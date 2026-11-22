@@ -1,0 +1,14 @@
+def test_dashboard_entry_persists_category_and_severity(client):
+    client.post("/events", data={
+        "title": "Deploy release",
+        "category": "build",
+        "severity": "high",
+    })
+    response = client.get("/")
+    assert b"Deploy release" in response.data
+    assert b"BUILD" in response.data
+    assert b"HIGH" in response.data
+
+def test_dashboard_rejects_blank_entry_title(client):
+    response = client.post("/events", data={"title": ""}, follow_redirects=True)
+    assert b"Add a title before saving" in response.data
