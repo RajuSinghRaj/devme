@@ -204,3 +204,21 @@ def filter_events(database, query='', category='', severity='', limit=50, offset
         return [dict(row) for row in rows]
     finally:
         connection.close()
+
+
+def event_breakdown(database):
+    """Return grouped totals by category and severity."""
+    connection = connect(database)
+    try:
+        categories = connection.execute(
+            "SELECT category, COUNT(*) AS total FROM events GROUP BY category ORDER BY category COLLATE NOCASE"
+        ).fetchall()
+        severities = connection.execute(
+            "SELECT severity, COUNT(*) AS total FROM events GROUP BY severity ORDER BY severity"
+        ).fetchall()
+        return {
+            "categories": {row["category"]: row["total"] for row in categories},
+            "severities": {row["severity"]: row["total"] for row in severities},
+        }
+    finally:
+        connection.close()
