@@ -31,3 +31,9 @@ def test_backup_database_cli_command(app, tmp_path):
     result = app.test_cli_runner().invoke(args=["backup-db", "--output", str(target)])
     assert result.exit_code == 0
     assert target.exists()
+
+
+def test_prune_checks_cli_command(app):
+    result = app.test_cli_runner().invoke(args=["prune-checks", "--before", "2999-01-01 00:00:00"])
+    assert result.exit_code == 0
+    assert "Removed 0" in result.output
