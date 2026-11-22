@@ -161,7 +161,11 @@ def create_app(test_config=None):
     @app.get("/")
     def dashboard():
         query = request.args.get("q", "")[:100]
-        entries = search_events(app.config["DATABASE"], query) if query else list_events(app.config["DATABASE"])
+        category = request.args.get("category", "")[:40]
+        if category:
+            entries = list_events_by_category(app.config["DATABASE"], category)
+        else:
+            entries = search_events(app.config["DATABASE"], query) if query else list_events(app.config["DATABASE"])
         return render_template("index.html", events=entries, query=query, categories=list_categories(app.config["DATABASE"]), selected_category=request.args.get("category", ""), event_count=count_events(app.config["DATABASE"]), category_count=len(list_categories(app.config["DATABASE"])))
 
     return app
