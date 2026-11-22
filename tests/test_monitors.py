@@ -22,3 +22,12 @@ def test_monitor_can_be_deleted(app):
     monitor_id = create_monitor(app.config["DATABASE"], "Docs", "https://docs.example")
     assert delete_monitor(app.config["DATABASE"], monitor_id)
     assert list_monitors(app.config["DATABASE"]) == []
+
+
+def test_monitor_listing_includes_latest_check_state(app):
+    from monitors import record_result
+    monitor_id = create_monitor(app.config["DATABASE"], "Docs", "https://docs.example")
+    record_result(app.config["DATABASE"], monitor_id, False, 503, 90, "down")
+    monitor = list_monitors(app.config["DATABASE"])[0]
+    assert monitor["last_success"] == 0
+    assert monitor["last_checked"] is not None

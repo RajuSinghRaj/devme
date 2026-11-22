@@ -18,7 +18,10 @@ def list_monitors(database):
     connection = connect(database)
     try:
         rows = connection.execute(
-            "SELECT id, name, url, interval_seconds, enabled, created_at FROM monitors ORDER BY id DESC"
+            "SELECT m.id, m.name, m.url, m.interval_seconds, m.enabled, m.created_at, "
+            "(SELECT success FROM monitor_results r WHERE r.monitor_id = m.id ORDER BY r.id DESC LIMIT 1) AS last_success, "
+            "(SELECT checked_at FROM monitor_results r WHERE r.monitor_id = m.id ORDER BY r.id DESC LIMIT 1) AS last_checked "
+            "FROM monitors m ORDER BY m.id DESC"
         ).fetchall()
         return [dict(row) for row in rows]
     finally:
