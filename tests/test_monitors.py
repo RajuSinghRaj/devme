@@ -31,3 +31,12 @@ def test_monitor_listing_includes_latest_check_state(app):
     monitor = list_monitors(app.config["DATABASE"])[0]
     assert monitor["last_success"] == 0
     assert monitor["last_checked"] is not None
+
+
+def test_monitor_names_and_urls_are_returned_as_saved(app):
+    name = "Build & Release"
+    url = "https://example.com/status?region=west"
+    create_monitor(app.config["DATABASE"], name, url)
+    monitor = list_monitors(app.config["DATABASE"])[0]
+    assert monitor["name"] == name
+    assert monitor["url"] == url
