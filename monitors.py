@@ -46,3 +46,17 @@ def delete_monitor(database, monitor_id):
             return cursor.rowcount == 1
     finally:
         connection.close()
+
+
+def record_result(database, monitor_id, success, status_code=None, response_ms=None, error=''):
+    connection = connect(database)
+    try:
+        with connection:
+            cursor = connection.execute(
+                "INSERT INTO monitor_results (monitor_id, success, status_code, response_ms, error) "
+                "VALUES (?, ?, ?, ?, ?)",
+                (monitor_id, int(bool(success)), status_code, response_ms, error[:500]),
+            )
+            return cursor.lastrowid
+    finally:
+        connection.close()
