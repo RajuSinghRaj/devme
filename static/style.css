@@ -28,3 +28,5 @@
 .form-success{font-size:12px;color:var(--ink);border-left:2px solid #111;padding:8px 12px}
 
 .monitor-metrics{margin:0 0 32px}.monitor-metrics article{padding:18px 16px}.monitor-metrics article:first-child{padding-left:0}
+
+.event-list strong a{color:var(--ink);text-decoration:none}.event-list strong a:hover{text-decoration:underline}.event-detail{padding:76px 0;max-width:720px}.event-detail h1{font-size:clamp(38px,7vw,68px);letter-spacing:-.07em;line-height:1.05;margin:18px 0}.event-detail time{font:10px 'DM Mono',monospace;color:var(--muted)}.event-body{margin-top:36px;line-height:1.8;font-size:14px;white-space:pre-wrap;color:#555}
