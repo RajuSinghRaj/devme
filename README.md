@@ -27,3 +27,5 @@ Set `DEVTRACK_SECRET_KEY` to a private random value before deployment. Set `DEVT
 Use `flask --app run init-db` to initialize the configured database and `flask --app run count-events` to print the saved log count, or `flask --app run count-monitors` to print configured monitor totals.
 
 Use `flask --app run export-events` to print event CSV, or pass `--output path/to/events.csv` to save it.
+
+Create a consistent SQLite copy with `flask --app run backup-db --output backups/devtrack.sqlite`. To restore it, stop the app, replace the configured database file with the backup, then start the app again.
