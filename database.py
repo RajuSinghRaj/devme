@@ -52,3 +52,16 @@ def initialize(path):
             connection.executescript(SCHEMA)
     finally:
         connection.close()
+
+
+def backup(source, destination):
+    """Create a consistent SQLite backup at destination."""
+    destination_path = Path(destination)
+    destination_path.parent.mkdir(parents=True, exist_ok=True)
+    source_connection = connect(source)
+    target_connection = sqlite3.connect(str(destination_path))
+    try:
+        source_connection.backup(target_connection)
+    finally:
+        target_connection.close()
+        source_connection.close()
