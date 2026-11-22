@@ -1,4 +1,5 @@
 from datetime import datetime, timezone
+import os
 
 from flask import Flask, jsonify, render_template
 
@@ -7,7 +8,7 @@ def create_app(test_config=None):
     """Create and configure the DevTrack Flask application."""
     app = Flask(__name__)
     app.config.from_mapping(
-        SECRET_KEY="devtrack-local-key",
+        SECRET_KEY=os.environ.get("DEVTRACK_SECRET_KEY", "devtrack-local-key"),
         TESTING=False,
     )
     if test_config:
