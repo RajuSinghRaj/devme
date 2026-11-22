@@ -69,3 +69,11 @@ def test_new_monitor_is_not_due_before_its_interval(app):
     from monitors import create_monitor, list_monitors
     create_monitor(app.config["DATABASE"], "Fresh", "https://fresh.example", 3600)
     assert list_monitors(app.config["DATABASE"])[0]["is_due"] == 0
+
+
+def test_paused_monitor_is_not_due(app):
+    from monitors import set_monitor_enabled
+    monitor_id = create_monitor(app.config["DATABASE"], "Paused", "https://paused.example", 30)
+    set_monitor_enabled(app.config["DATABASE"], monitor_id, False)
+    monitor = next(row for row in list_monitors(app.config["DATABASE"]) if row["id"] == monitor_id)
+    assert monitor["is_due"] == 0
