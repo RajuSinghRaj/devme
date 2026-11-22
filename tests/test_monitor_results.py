@@ -12,3 +12,14 @@ def test_monitor_result_can_be_recorded(app):
         assert row["response_ms"] == 42.5
     finally:
         connection.close()
+
+
+def test_monitor_results_are_listed_newest_first(app):
+    from monitors import list_results
+    monitor_id = create_monitor(app.config["DATABASE"], "Docs", "https://docs.example")
+    record_result(app.config["DATABASE"], monitor_id, True, 200, 20)
+    record_result(app.config["DATABASE"], monitor_id, False, 503, 80, "unavailable")
+    results = list_results(app.config["DATABASE"], monitor_id)
+    assert len(results) == 2
+    assert results[0]["success"] == 0
+    assert results[0]["error"] == "unavailable"

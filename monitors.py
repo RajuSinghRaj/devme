@@ -60,3 +60,17 @@ def record_result(database, monitor_id, success, status_code=None, response_ms=N
             return cursor.lastrowid
     finally:
         connection.close()
+
+
+def list_results(database, monitor_id, limit=50):
+    bounded_limit = max(1, min(int(limit), 100))
+    connection = connect(database)
+    try:
+        rows = connection.execute(
+            "SELECT id, monitor_id, success, status_code, response_ms, checked_at, error "
+            "FROM monitor_results WHERE monitor_id = ? ORDER BY id DESC LIMIT ?",
+            (monitor_id, bounded_limit),
+        ).fetchall()
+        return [dict(row) for row in rows]
+    finally:
+        connection.close()
