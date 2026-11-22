@@ -18,3 +18,10 @@ def test_uptime_is_nonnegative(client):
     response = client.get("/health/uptime")
     assert response.status_code == 200
     assert response.json["uptime_seconds"] >= 0
+
+
+def test_ready_endpoint_handles_empty_database(client):
+    response = client.get("/health/ready")
+    assert response.status_code == 200
+    assert response.json["event_count"] == 0
+    assert response.json["database"] == "connected"
