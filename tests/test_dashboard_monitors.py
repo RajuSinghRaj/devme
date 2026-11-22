@@ -7,3 +7,9 @@ def test_dashboard_lists_configured_monitors(client):
     response = client.get("/")
     assert b"Docs" in response.data
     assert b"https://docs.example" in response.data
+
+
+def test_dashboard_shows_monitor_latest_state(client):
+    monitor_id = client.post("/api/monitors", json={"name": "Docs", "url": "https://docs.example"}).json["id"]
+    client.post(f"/api/monitors/{monitor_id}/results", json={"success": False, "status_code": 503})
+    assert b"DOWN" in client.get("/").data
