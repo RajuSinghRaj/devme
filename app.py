@@ -6,7 +6,7 @@ from pathlib import Path
 from database import initialize
 from events import create_event, list_events
 
-from flask import Flask, jsonify, render_template, request
+from flask import Flask, jsonify, redirect, render_template, request, url_for
 
 
 def create_app(test_config=None):
@@ -72,6 +72,6 @@ def create_app(test_config=None):
 
     @app.get("/")
     def dashboard():
-        return render_template("index.html")
+        return render_template("index.html", events=list_events(app.config["DATABASE"]))
 
     return app
