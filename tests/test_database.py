@@ -37,3 +37,12 @@ def test_monitor_schema_is_initialized(app):
         assert {"id", "name", "url", "interval_seconds", "enabled", "created_at"} <= columns
     finally:
         connection.close()
+
+
+def test_monitor_result_schema_exists(app):
+    connection = connect(app.config["DATABASE"])
+    try:
+        columns = {row["name"] for row in connection.execute("PRAGMA table_info(monitor_results)")}
+        assert {"id", "monitor_id", "success", "status_code", "response_ms", "checked_at", "error"} <= columns
+    finally:
+        connection.close()

@@ -22,6 +22,16 @@ CREATE TABLE IF NOT EXISTS monitors (
     enabled INTEGER NOT NULL DEFAULT 1 CHECK (enabled IN (0, 1)),
     created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
+CREATE TABLE IF NOT EXISTS monitor_results (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    monitor_id INTEGER NOT NULL REFERENCES monitors(id) ON DELETE CASCADE,
+    success INTEGER NOT NULL CHECK (success IN (0, 1)),
+    status_code INTEGER,
+    response_ms REAL CHECK (response_ms IS NULL OR response_ms >= 0),
+    checked_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    error TEXT NOT NULL DEFAULT ''
+);
+CREATE INDEX IF NOT EXISTS idx_results_monitor_checked ON monitor_results (monitor_id, checked_at DESC);
 """
 
 def connect(path):
