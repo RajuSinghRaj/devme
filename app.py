@@ -47,7 +47,9 @@ def create_app(test_config=None):
             str(payload.get("category", "note"))[:40],
             severity,
         )
-        return jsonify(id=event_id), 201
+        response = jsonify(id=event_id)
+        response.headers["Location"] = url_for("api_event_detail", event_id=event_id)
+        return response, 201
 
     @app.put("/api/events/<int:event_id>")
     def api_update_event(event_id):
