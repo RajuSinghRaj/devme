@@ -374,6 +374,20 @@ def create_app(test_config=None):
             )
         return redirect(url_for("dashboard"))
 
+    @app.post("/monitors/<int:monitor_id>/toggle")
+    def toggle_dashboard_monitor(monitor_id):
+        monitor = get_monitor(app.config["DATABASE"], monitor_id)
+        if monitor is None:
+            return render_template("404.html"), 404
+        set_monitor_enabled(app.config["DATABASE"], monitor_id, not bool(monitor["enabled"]))
+        return redirect(url_for("dashboard"))
+
+    @app.post("/monitors/<int:monitor_id>/delete")
+    def delete_dashboard_monitor(monitor_id):
+        if not delete_monitor(app.config["DATABASE"], monitor_id):
+            return render_template("404.html"), 404
+        return redirect(url_for("dashboard"))
+
     @app.post("/monitors")
     def create_dashboard_monitor():
         name = request.form.get("name", "").strip()

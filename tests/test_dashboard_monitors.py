@@ -45,3 +45,18 @@ def test_dashboard_reports_invalid_monitor_form(client):
 def test_dashboard_confirms_monitor_creation(client):
     response = client.post("/monitors", data={"name": "Docs", "url": "https://docs.example"}, follow_redirects=True)
     assert b"Monitor saved" in response.data
+
+
+def test_dashboard_can_pause_and_resume_monitor(client):
+    from monitors import list_monitors
+    monitor_id = client.post("/api/monitors", json={"name": "Toggle", "url": "https://toggle.example"}).json["id"]
+    client.post(f"/monitors/{monitor_id}/toggle")
+    assert list_monitors(client.application.config["DATABASE"])[0]["enabled"] == 0
+    client.post(f"/monitors/{monitor_id}/toggle")
+    assert list_monitors(client.application.config["DATABASE"])[0]["enabled"] == 1
+
+def test_dashboard_can_remove_monitor(client):
+    from monitors import list_monitors
+    monitor_id = client.post("/api/monitors", json={"name": "Remove", "url": "https://remove.example"}).json["id"]
+    assert client.post(f"/monitors/{monitor_id}/delete").status_code == 302
+    assert list_monitors(client.application.config["DATABASE"]) == []
