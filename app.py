@@ -30,6 +30,7 @@ def create_app(test_config=None):
     @app.after_request
     def add_content_type_options(response):
         response.headers["X-Request-ID"] = g.request_id
+        app.logger.info("request complete", extra={"request_id": g.request_id, "http_status": response.status_code})
         response.headers.setdefault("X-Content-Type-Options", "nosniff")
         response.headers.setdefault("X-Frame-Options", "DENY")
         response.headers.setdefault("Referrer-Policy", "strict-origin-when-cross-origin")
