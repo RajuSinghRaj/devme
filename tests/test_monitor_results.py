@@ -1,4 +1,4 @@
-from monitors import create_monitor, record_result
+from monitors import create_monitor, list_results, record_result
 from database import connect
 
 def test_monitor_result_can_be_recorded(app):
@@ -54,3 +54,12 @@ def test_monitor_summary_counts_current_failure_streak(app):
     record_result(app.config["DATABASE"], monitor_id, False, 503, 20)
     record_result(app.config["DATABASE"], monitor_id, False, 503, 25)
     assert monitor_summary(app.config["DATABASE"], monitor_id)["failure_streak"] == 2
+
+
+def test_pruning_preserves_results_after_cutoff(app):
+    from monitors import prune_results
+    monitor_id = create_monitor(app.config["DATABASE"], "Docs", "https://docs.example")
+    record_result(app.config["DATABASE"], monitor_id, True, 200, 10)
+    assert prune_results(app.config["DATABASE"], "2000-01-01 00:00:00") == 0
+    assert len(list_results(app.config["DATABASE"], monitor_id)) == 1
+
