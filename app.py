@@ -173,6 +173,12 @@ def create_app(test_config=None):
     def api_summary():
         return jsonify(event_count=count_events(app.config["DATABASE"]), category_count=len(list_categories(app.config["DATABASE"])), monitor_count=len(list_monitors(app.config["DATABASE"])), latest_event=latest_event(app.config["DATABASE"]))
 
+    @app.post("/events/<int:event_id>/delete")
+    def delete_event_page(event_id):
+        if not delete_event(app.config["DATABASE"], event_id):
+            return render_template("404.html"), 404
+        return redirect(url_for("dashboard"))
+
     @app.route("/events/<int:event_id>/edit", methods=["GET", "POST"])
     def edit_event_page(event_id):
         event = get_event(app.config["DATABASE"], event_id)
