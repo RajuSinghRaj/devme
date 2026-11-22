@@ -17,10 +17,13 @@ def create_app(test_config=None):
     app.config.from_mapping(
         SECRET_KEY=os.environ.get("DEVTRACK_SECRET_KEY", "devtrack-local-key"),
         TESTING=False,
+        LOG_LEVEL=os.environ.get("DEVTRACK_LOG_LEVEL", "INFO").upper(),
         DATABASE=os.environ.get("DEVTRACK_DATABASE", str(Path(app.instance_path) / "devtrack.sqlite")),
     )
     if test_config:
         app.config.update(test_config)
+    import logging
+    app.logger.setLevel(getattr(logging, app.config["LOG_LEVEL"], logging.INFO))
     initialize(app.config["DATABASE"])
 
     @app.before_request

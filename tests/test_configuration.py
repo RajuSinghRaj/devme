@@ -13,3 +13,10 @@ def test_database_path_can_be_overridden(tmp_path):
     app = create_app({"TESTING": True, "DATABASE": str(target)})
     assert target.exists()
     assert app.config["DATABASE"] == str(target)
+
+
+def test_log_level_can_be_configured(tmp_path):
+    from app import create_app
+    app = create_app({"TESTING": True, "LOG_LEVEL": "WARNING", "DATABASE": str(tmp_path / "log.sqlite")})
+    import logging
+    assert app.logger.level == logging.WARNING
