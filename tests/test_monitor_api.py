@@ -55,3 +55,12 @@ def test_monitor_api_updates_metadata(client):
     assert response.status_code == 200
     assert response.json["monitor"]["name"] == "Status"
     assert response.json["monitor"]["interval_seconds"] == 600
+
+
+def test_monitor_schedule_endpoint_reports_next_run(client):
+    monitor_id = client.post("/api/monitors", json={"name": "Docs", "url": "https://docs.example", "interval_seconds": 600}).json["id"]
+    response = client.get(f"/api/monitors/{monitor_id}/schedule")
+    assert response.status_code == 200
+    assert response.json["interval_seconds"] == 600
+    assert response.json["next_check_at"]
+    assert response.json["is_due"] is False

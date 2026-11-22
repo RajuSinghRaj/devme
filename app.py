@@ -149,6 +149,13 @@ def create_app(test_config=None):
             return render_template("404.html"), 404
         return render_template("monitor.html", monitor=monitor, results=list_results(app.config["DATABASE"], monitor_id))
 
+    @app.get("/api/monitors/<int:monitor_id>/schedule")
+    def api_monitor_schedule(monitor_id):
+        monitor = get_monitor(app.config["DATABASE"], monitor_id)
+        if monitor is None:
+            return jsonify(error="monitor not found"), 404
+        return jsonify(is_due=bool(monitor["is_due"]), next_check_at=monitor["next_check_at"], interval_seconds=monitor["interval_seconds"])
+
     @app.get("/api/monitors/<int:monitor_id>/summary")
     def api_monitor_summary(monitor_id):
         if not any(row["id"] == monitor_id for row in list_monitors(app.config["DATABASE"])):
