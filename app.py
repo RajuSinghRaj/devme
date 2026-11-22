@@ -22,6 +22,9 @@ def create_app(test_config=None):
         SECRET_KEY=os.environ.get("DEVTRACK_SECRET_KEY", "devtrack-local-key"),
         TESTING=False,
         LOG_LEVEL=os.environ.get("DEVTRACK_LOG_LEVEL", "INFO").upper(),
+        SESSION_COOKIE_HTTPONLY=True,
+        SESSION_COOKIE_SAMESITE="Lax",
+        SESSION_COOKIE_SECURE=os.environ.get("DEVTRACK_COOKIE_SECURE", "0").lower() in {"1", "true", "yes"},
         DATABASE=os.environ.get("DEVTRACK_DATABASE", str(Path(app.instance_path) / "devtrack.sqlite")),
     )
     if test_config:
@@ -120,6 +123,13 @@ def create_app(test_config=None):
     def count_events_command():
         """Print the number of saved developer log entries."""
         click.echo(count_events(app.config["DATABASE"]))
+
+    @app.errorhandler(500)
+    def handle_server_error(error):
+        app.logger.error("request failed", extra={"request_id": g.get("request_id", "unknown")})
+        if request.path.startswith("/api/"):
+            return jsonify(error="internal server error", request_id=g.get("request_id")), 500
+        return render_template("500.html"), 500
 
     @app.errorhandler(404)
     def handle_not_found(error):
