@@ -47,7 +47,11 @@ def create_app(test_config=None):
 
     @app.get("/api/events")
     def api_events():
-        return jsonify(events=list_events(app.config["DATABASE"]))
+        try:
+            limit = int(request.args.get("limit", "50"))
+        except ValueError:
+            return jsonify(error="limit must be an integer"), 400
+        return jsonify(events=list_events(app.config["DATABASE"], limit=limit))
 
     @app.get("/version")
     def version():
