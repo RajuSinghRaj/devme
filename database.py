@@ -8,7 +8,8 @@ CREATE TABLE IF NOT EXISTS events (
     title TEXT NOT NULL,
     details TEXT NOT NULL DEFAULT '',
     category TEXT NOT NULL DEFAULT 'note',
-    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    severity TEXT NOT NULL DEFAULT 'normal' CHECK (severity IN ('low', 'normal', 'high'))
 );
 """
 
