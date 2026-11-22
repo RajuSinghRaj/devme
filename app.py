@@ -119,6 +119,13 @@ def create_app(test_config=None):
     def api_summary():
         return jsonify(event_count=count_events(app.config["DATABASE"]), latest_event=latest_event(app.config["DATABASE"]))
 
+    @app.get("/monitors/<int:monitor_id>")
+    def monitor_detail(monitor_id):
+        monitor = next((row for row in list_monitors(app.config["DATABASE"]) if row["id"] == monitor_id), None)
+        if monitor is None:
+            return render_template("404.html"), 404
+        return render_template("monitor.html", monitor=monitor, results=list_results(app.config["DATABASE"], monitor_id))
+
     @app.get("/api/monitors/<int:monitor_id>/summary")
     def api_monitor_summary(monitor_id):
         if not any(row["id"] == monitor_id for row in list_monitors(app.config["DATABASE"])):
