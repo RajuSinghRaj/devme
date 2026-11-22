@@ -34,7 +34,9 @@ def create_app(test_config=None):
 
     @app.post("/api/events")
     def api_create_event():
-        payload = request.get_json(silent=True) or {}
+        payload = request.get_json(silent=True)
+        if not isinstance(payload, dict):
+            return jsonify(error="JSON object required"), 400
         title = payload.get("title", "")
         if not isinstance(title, str) or not title.strip():
             return jsonify(error="title is required"), 400
