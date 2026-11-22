@@ -19,3 +19,9 @@ def test_monitor_api_pause_and_delete(client):
     assert client.patch(f"/api/monitors/{monitor_id}", json={"enabled": False}).json["enabled"] is False
     assert client.delete(f"/api/monitors/{monitor_id}").status_code == 204
     assert client.delete(f"/api/monitors/{monitor_id}").status_code == 404
+
+
+def test_monitor_api_rejects_interval_below_minimum(client):
+    response = client.post("/api/monitors", json={"name": "Fast", "url": "https://example.com", "interval_seconds": 5})
+    assert response.status_code == 400
+    assert "at least 30" in response.json["error"]
