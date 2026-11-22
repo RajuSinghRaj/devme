@@ -119,6 +119,27 @@ def create_app(test_config=None):
     def api_summary():
         return jsonify(event_count=count_events(app.config["DATABASE"]), latest_event=latest_event(app.config["DATABASE"]))
 
+    @app.post("/api/monitors")
+    def api_create_monitor():
+        payload = request.get_json(silent=True)
+        if not isinstance(payload, dict):
+            return jsonify(error="JSON object required"), 400
+        name = payload.get("name", "")
+        url = payload.get("url", "")
+        interval = payload.get("interval_seconds", 300)
+        if not isinstance(name, str) or not name.strip():
+            return jsonify(error="name is required"), 400
+        if not isinstance(url, str) or not url.startswith(("https://", "http://")):
+            return jsonify(error="url must use http or https"), 400
+        try:
+            interval = int(interval)
+        except (TypeError, ValueError):
+            return jsonify(error="interval_seconds must be an integer"), 400
+        if interval < 30:
+            return jsonify(error="interval_seconds must be at least 30"), 400
+        monitor_id = create_monitor(app.config["DATABASE"], name.strip()[:120], url[:2048], interval)
+        return jsonify(id=monitor_id), 201
+
     @app.get("/api/monitors")
     def api_monitors():
         return jsonify(monitors=list_monitors(app.config["DATABASE"]))
