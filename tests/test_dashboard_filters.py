@@ -8,3 +8,9 @@ def test_dashboard_category_filter_limits_entries(client):
 def test_dashboard_search_can_be_cleared(client):
     response = client.get("/?q=none")
     assert b"Clear filters" in response.data
+
+
+def test_dashboard_displays_date_filter_controls(client):
+    response = client.get("/")
+    assert b'name="from"' in response.data
+    assert b'name="to"' in response.data
