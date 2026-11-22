@@ -8,7 +8,7 @@ from pathlib import Path
 
 from database import backup, initialize
 from monitors import create_monitor, delete_monitor, get_monitor, list_monitors, list_results, monitor_summary, prune_results, record_result, update_monitor, set_monitor_enabled
-from events import create_event, delete_event, filter_events, count_events, export_events_csv, latest_event, list_categories, list_events, list_events_by_category, list_events_by_severity, search_events, update_event
+from events import create_event, delete_event, event_breakdown, filter_events, count_events, export_events_csv, latest_event, list_categories, list_events, list_events_by_category, list_events_by_severity, search_events, update_event
 
 from flask import Flask, g, jsonify, make_response, redirect, render_template, request, url_for
 import click
@@ -164,6 +164,10 @@ def create_app(test_config=None):
         response.headers["Content-Disposition"] = "attachment; filename=devtrack-events.csv"
         response.headers["X-Content-Type-Options"] = "nosniff"
         return response
+
+    @app.get("/api/events/breakdown")
+    def api_event_breakdown():
+        return jsonify(event_breakdown(app.config["DATABASE"]))
 
     @app.get("/api/summary")
     def api_summary():
