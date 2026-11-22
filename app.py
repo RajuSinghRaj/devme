@@ -124,7 +124,7 @@ def create_app(test_config=None):
 
     @app.get("/health/ready")
     def readiness():
-        return jsonify(status="ready", service="DevTrack")
+        return jsonify(status="ready", service="DevTrack", database="connected", event_count=count_events(app.config["DATABASE"]))
 
     @app.post("/events")
     def create_dashboard_event():
