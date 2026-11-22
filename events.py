@@ -60,3 +60,14 @@ def search_events(database, query, limit=50):
         return [dict(row) for row in rows]
     finally:
         connection.close()
+
+
+def delete_event(database, event_id):
+    """Delete an event and report whether a row was removed."""
+    connection = connect(database)
+    try:
+        with connection:
+            cursor = connection.execute("DELETE FROM events WHERE id = ?", (event_id,))
+            return cursor.rowcount == 1
+    finally:
+        connection.close()
