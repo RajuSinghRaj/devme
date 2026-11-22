@@ -36,3 +36,13 @@ def set_monitor_enabled(database, monitor_id, enabled):
             return cursor.rowcount == 1
     finally:
         connection.close()
+
+
+def delete_monitor(database, monitor_id):
+    connection = connect(database)
+    try:
+        with connection:
+            cursor = connection.execute("DELETE FROM monitors WHERE id = ?", (monitor_id,))
+            return cursor.rowcount == 1
+    finally:
+        connection.close()

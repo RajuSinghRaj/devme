@@ -15,3 +15,10 @@ def test_monitor_can_be_paused_and_resumed(app):
     assert list_monitors(app.config["DATABASE"])[0]["enabled"] == 0
     assert set_monitor_enabled(app.config["DATABASE"], monitor_id, True)
     assert list_monitors(app.config["DATABASE"])[0]["enabled"] == 1
+
+
+def test_monitor_can_be_deleted(app):
+    from monitors import delete_monitor
+    monitor_id = create_monitor(app.config["DATABASE"], "Docs", "https://docs.example")
+    assert delete_monitor(app.config["DATABASE"], monitor_id)
+    assert list_monitors(app.config["DATABASE"]) == []
