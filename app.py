@@ -213,11 +213,11 @@ def create_app(test_config=None):
         category = request.args.get("category", "")[:40]
         severity = request.args.get("severity", "")[:10]
         if severity in {"low", "normal", "high"}:
-            entries = list_events_by_severity(app.config["DATABASE"], severity, limit)
+            entries = list_events_by_severity(app.config["DATABASE"], severity, limit, (page - 1) * min(max(limit, 1), 100))
         elif category:
-            entries = list_events_by_category(app.config["DATABASE"], category, limit)
+            entries = list_events_by_category(app.config["DATABASE"], category, limit, (page - 1) * min(max(limit, 1), 100))
         else:
-            entries = search_events(app.config["DATABASE"], query, limit) if query else list_events(app.config["DATABASE"], limit, (page - 1) * min(max(limit, 1), 100))
+            entries = search_events(app.config["DATABASE"], query, limit, (page - 1) * min(max(limit, 1), 100)) if query else list_events(app.config["DATABASE"], limit, (page - 1) * min(max(limit, 1), 100))
         return jsonify(events=entries, page=page, limit=min(max(limit, 1), 100))
 
     @app.get("/version")
@@ -256,12 +256,23 @@ def create_app(test_config=None):
         query = request.args.get("q", "")[:100]
         category = request.args.get("category", "")[:40]
         severity = request.args.get("severity", "")[:10]
+        try:
+            page = max(1, int(request.args.get("page", "1")))
+        except ValueError:
+            page = 1
+        page_size = 20
+        offset = (page - 1) * page_size
         if severity in {"low", "normal", "high"}:
-            entries = list_events_by_severity(app.config["DATABASE"], severity)
+            entries = list_events_by_severity(app.config["DATABASE"], severity, page_size + 1, offset)
         elif category:
-            entries = list_events_by_category(app.config["DATABASE"], category)
+            entries = list_events_by_category(app.config["DATABASE"], category, page_size + 1, offset)
+        elif query:
+            entries = search_events(app.config["DATABASE"], query, page_size + 1, offset)
         else:
-            entries = search_events(app.config["DATABASE"], query) if query else list_events(app.config["DATABASE"])
-        return render_template("index.html", events=entries, query=query, categories=list_categories(app.config["DATABASE"]), selected_category=request.args.get("category", ""), selected_severity=request.args.get("severity", ""), event_count=count_events(app.config["DATABASE"]), category_count=len(list_categories(app.config["DATABASE"])), monitors=list_monitors(app.config["DATABASE"]))
+            entries = list_events(app.config["DATABASE"], page_size + 1, offset)
+        has_next = len(entries) > page_size
+        entries = entries[:page_size]
+        filters = {key: request.args[key] for key in ("q", "category", "severity") if request.args.get(key)}
+        return render_template("index.html", events=entries, query=query, categories=list_categories(app.config["DATABASE"]), selected_category=category, selected_severity=severity, event_count=count_events(app.config["DATABASE"]), category_count=len(list_categories(app.config["DATABASE"])), monitors=list_monitors(app.config["DATABASE"]), page=page, has_next=has_next, filters=filters)
 
     return app

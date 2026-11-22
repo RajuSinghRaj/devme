@@ -47,19 +47,20 @@ def get_event(database, event_id):
         connection.close()
 
 
-def search_events(database, query, limit=50):
+def search_events(database, query, limit=50, offset=0):
     """Find events by title or details using a literal substring."""
     text = str(query).strip()
     if not text:
-        return list_events(database, limit)
+        return list_events(database, limit, offset)
     bounded_limit = max(1, min(int(limit), 100))
+    bounded_offset = max(0, int(offset))
     connection = connect(database)
     try:
         pattern = f"%{text}%"
         rows = connection.execute(
             "SELECT id, title, details, category, severity, created_at FROM events "
-            "WHERE title LIKE ? ESCAPE '\\' OR details LIKE ? ESCAPE '\\' ORDER BY id DESC LIMIT ?",
-            (pattern, pattern, bounded_limit),
+            "WHERE title LIKE ? ESCAPE '\\' OR details LIKE ? ESCAPE '\\' ORDER BY id DESC LIMIT ? OFFSET ?",
+            (pattern, pattern, bounded_limit, bounded_offset),
         ).fetchall()
         return [dict(row) for row in rows]
     finally:
@@ -112,15 +113,16 @@ def count_events(database):
         connection.close()
 
 
-def list_events_by_category(database, category, limit=50):
+def list_events_by_category(database, category, limit=50, offset=0):
     """List newest events from one category."""
     bounded_limit = max(1, min(int(limit), 100))
+    bounded_offset = max(0, int(offset))
     connection = connect(database)
     try:
         rows = connection.execute(
             "SELECT id, title, details, category, severity, created_at FROM events "
-            "WHERE category = ? ORDER BY id DESC LIMIT ?",
-            (category, bounded_limit),
+            "WHERE category = ? ORDER BY id DESC LIMIT ? OFFSET ?",
+            (category, bounded_limit, bounded_offset),
         ).fetchall()
         return [dict(row) for row in rows]
     finally:
@@ -155,17 +157,18 @@ def export_events_csv(database):
     return output.getvalue()
 
 
-def list_events_by_severity(database, severity, limit=50):
+def list_events_by_severity(database, severity, limit=50, offset=0):
     """List newest events with the requested severity."""
     if severity not in {"low", "normal", "high"}:
         return []
     bounded_limit = max(1, min(int(limit), 100))
+    bounded_offset = max(0, int(offset))
     connection = connect(database)
     try:
         rows = connection.execute(
             "SELECT id, title, details, category, severity, created_at FROM events "
-            "WHERE severity = ? ORDER BY id DESC LIMIT ?",
-            (severity, bounded_limit),
+            "WHERE severity = ? ORDER BY id DESC LIMIT ? OFFSET ?",
+            (severity, bounded_limit, bounded_offset),
         ).fetchall()
         return [dict(row) for row in rows]
     finally:
