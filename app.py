@@ -6,7 +6,7 @@ from pathlib import Path
 from database import initialize
 from events import create_event, list_events
 
-from flask import Flask, jsonify, render_template
+from flask import Flask, jsonify, render_template, request
 
 
 def create_app(test_config=None):
@@ -30,6 +30,20 @@ def create_app(test_config=None):
     @app.get("/health")
     def health():
         return jsonify(status="ok", service="DevTrack")
+
+    @app.post("/api/events")
+    def api_create_event():
+        payload = request.get_json(silent=True) or {}
+        title = payload.get("title", "")
+        if not isinstance(title, str) or not title.strip():
+            return jsonify(error="title is required"), 400
+        event_id = create_event(
+            app.config["DATABASE"], title.strip(),
+            str(payload.get("details", "")),
+            str(payload.get("category", "note")),
+            str(payload.get("severity", "normal")),
+        )
+        return jsonify(id=event_id), 201
 
     @app.get("/api/events")
     def api_events():
