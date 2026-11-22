@@ -4,7 +4,7 @@ import time
 from pathlib import Path
 
 from database import initialize
-from events import create_event, delete_event, list_events, search_events
+from events import create_event, delete_event, list_events, search_events, update_event
 
 from flask import Flask, jsonify, redirect, render_template, request, url_for
 
@@ -47,6 +47,26 @@ def create_app(test_config=None):
             severity,
         )
         return jsonify(id=event_id), 201
+
+    @app.put("/api/events/<int:event_id>")
+    def api_update_event(event_id):
+        payload = request.get_json(silent=True)
+        if not isinstance(payload, dict):
+            return jsonify(error="JSON object required"), 400
+        title = payload.get("title")
+        severity = payload.get("severity", "normal")
+        if not isinstance(title, str) or not title.strip():
+            return jsonify(error="title is required"), 400
+        if severity not in {"low", "normal", "high"}:
+            return jsonify(error="invalid severity"), 400
+        updated = update_event(
+            app.config["DATABASE"], event_id, title.strip()[:120],
+            str(payload.get("details", ""))[:2000],
+            str(payload.get("category", "note"))[:40], severity,
+        )
+        if not updated:
+            return jsonify(error="event not found"), 404
+        return jsonify(id=event_id, updated=True)
 
     @app.delete("/api/events/<int:event_id>")
     def api_delete_event(event_id):
