@@ -34,3 +34,5 @@
 .event-detail>.new-entry{display:inline-block;margin-top:28px}
 
 .event-actions{display:flex;align-items:center;gap:14px;margin-top:28px}.event-actions>.new-entry{margin:0}.delete-entry{border:1px solid var(--line);background:white;padding:11px 14px;font:10px 'DM Mono',monospace;cursor:pointer}
+
+.monitor-controls{display:flex;gap:8px;margin-top:6px}.monitor-controls button{border:0;background:transparent;padding:0;color:var(--muted);font:9px 'DM Mono',monospace;text-decoration:underline;cursor:pointer}
