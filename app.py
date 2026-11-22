@@ -25,6 +25,7 @@ def create_app(test_config=None):
     def add_content_type_options(response):
         response.headers.setdefault("X-Content-Type-Options", "nosniff")
         response.headers.setdefault("X-Frame-Options", "DENY")
+        response.headers.setdefault("Referrer-Policy", "strict-origin-when-cross-origin")
         return response
 
     @app.context_processor
