@@ -1,5 +1,6 @@
 from datetime import datetime, timezone
 import os
+import time
 
 from flask import Flask, jsonify, render_template
 
@@ -18,9 +19,19 @@ def create_app(test_config=None):
     def inject_now():
         return {"current_year": datetime.now(timezone.utc).year}
 
+    app.extensions["devtrack_started_at"] = time.monotonic()
+
     @app.get("/health")
     def health():
         return jsonify(status="ok", service="DevTrack")
+
+    @app.get("/health/live")
+    def liveness():
+        return jsonify(status="alive")
+
+    @app.get("/health/ready")
+    def readiness():
+        return jsonify(status="ready", service="DevTrack")
 
     @app.get("/")
     def dashboard():
