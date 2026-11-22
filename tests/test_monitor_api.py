@@ -82,3 +82,11 @@ def test_monitor_api_rejects_embedded_url_credentials(client):
     response = client.post("/api/monitors", json={"name": "Private", "url": "https://user:secret@example.com"})
     assert response.status_code == 400
     assert "without credentials" in response.json["error"]
+
+
+def test_monitor_results_api_supports_bounded_limit(client):
+    monitor_id = client.post("/api/monitors", json={"name": "Docs", "url": "https://docs.example"}).json["id"]
+    for _ in range(3):
+        client.post(f"/api/monitors/{monitor_id}/results", json={"success": True})
+    assert len(client.get(f"/api/monitors/{monitor_id}/results?limit=2").json["results"]) == 2
+    assert client.get(f"/api/monitors/{monitor_id}/results?limit=no").status_code == 400

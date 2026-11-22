@@ -198,7 +198,13 @@ def create_app(test_config=None):
         known = any(row["id"] == monitor_id for row in list_monitors(app.config["DATABASE"]))
         if not known:
             return jsonify(error="monitor not found"), 404
-        return jsonify(results=list_results(app.config["DATABASE"], monitor_id))
+        try:
+            limit = int(request.args.get("limit", "50"))
+        except ValueError:
+            return jsonify(error="limit must be an integer"), 400
+        if limit < 1:
+            return jsonify(error="limit must be positive"), 400
+        return jsonify(results=list_results(app.config["DATABASE"], monitor_id, limit))
 
     @app.post("/api/monitors/<int:monitor_id>/results")
     def api_record_monitor_result(monitor_id):
