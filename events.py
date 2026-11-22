@@ -174,3 +174,33 @@ def list_events_by_severity(database, severity, limit=50, offset=0):
         return [dict(row) for row in rows]
     finally:
         connection.close()
+
+
+def filter_events(database, query='', category='', severity='', limit=50, offset=0):
+    """Apply text, category, and severity filters together."""
+    conditions = []
+    parameters = []
+    if query and query.strip():
+        escaped = query.strip().replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
+        pattern = f"%{escaped}%"
+        conditions.append("(title LIKE ? ESCAPE '\\' OR details LIKE ? ESCAPE '\\')")
+        parameters.extend((pattern, pattern))
+    if category:
+        conditions.append("category = ?")
+        parameters.append(category)
+    if severity in {"low", "normal", "high"}:
+        conditions.append("severity = ?")
+        parameters.append(severity)
+    where = " WHERE " + " AND ".join(conditions) if conditions else ""
+    bounded_limit = max(1, min(int(limit), 100))
+    bounded_offset = max(0, int(offset))
+    connection = connect(database)
+    try:
+        rows = connection.execute(
+            "SELECT id, title, details, category, severity, created_at FROM events"
+            + where + " ORDER BY id DESC LIMIT ? OFFSET ?",
+            (*parameters, bounded_limit, bounded_offset),
+        ).fetchall()
+        return [dict(row) for row in rows]
+    finally:
+        connection.close()
