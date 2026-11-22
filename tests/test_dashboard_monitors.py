@@ -36,3 +36,12 @@ def test_dashboard_monitor_form_is_rendered(client):
     assert b'id="monitor-name"' in response.data
     assert b'name="url"' in response.data
 
+
+
+def test_dashboard_reports_invalid_monitor_form(client):
+    response = client.post("/monitors", data={"name": "Bad", "url": "file:///tmp/a"}, follow_redirects=True)
+    assert b"valid HTTP or HTTPS URL" in response.data
+
+def test_dashboard_confirms_monitor_creation(client):
+    response = client.post("/monitors", data={"name": "Docs", "url": "https://docs.example"}, follow_redirects=True)
+    assert b"Monitor saved" in response.data

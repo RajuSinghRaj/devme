@@ -328,9 +328,10 @@ def create_app(test_config=None):
             interval = int(request.form.get("interval_seconds", "300"))
         except ValueError:
             interval = 0
-        if name and parsed_url and parsed_url.scheme in {"http", "https"} and parsed_url.hostname and interval >= 30:
-            create_monitor(app.config["DATABASE"], name[:120], url[:2048], interval)
-        return redirect(url_for("dashboard"))
+        if not name or not parsed_url or parsed_url.scheme not in {"http", "https"} or not parsed_url.hostname or interval < 30:
+            return redirect(url_for("dashboard", monitor_error="invalid"))
+        create_monitor(app.config["DATABASE"], name[:120], url[:2048], interval)
+        return redirect(url_for("dashboard", monitor_created="1"))
 
     @app.get("/")
     def dashboard():
