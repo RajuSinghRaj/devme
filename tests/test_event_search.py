@@ -11,3 +11,10 @@ def test_event_search_supports_offset(client):
         client.post("/api/events", json={"title": title})
     response = client.get("/api/events?q=worker&limit=1&page=2")
     assert response.json["events"][0]["title"] == "worker two"
+
+
+def test_search_treats_underscore_as_literal(client):
+    client.post("/api/events", json={"title": "build_tools guide"})
+    client.post("/api/events", json={"title": "buildXtools guide"})
+    response = client.get("/api/events?q=build_tools")
+    assert [row["title"] for row in response.json["events"]] == ["build_tools guide"]

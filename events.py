@@ -56,7 +56,8 @@ def search_events(database, query, limit=50, offset=0):
     bounded_offset = max(0, int(offset))
     connection = connect(database)
     try:
-        pattern = f"%{text}%"
+        escaped_text = text.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
+        pattern = f"%{escaped_text}%"
         rows = connection.execute(
             "SELECT id, title, details, category, severity, created_at FROM events "
             "WHERE title LIKE ? ESCAPE '\\' OR details LIKE ? ESCAPE '\\' ORDER BY id DESC LIMIT ? OFFSET ?",
