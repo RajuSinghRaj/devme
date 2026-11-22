@@ -97,3 +97,12 @@ def list_categories(database):
         return [row[0] for row in rows]
     finally:
         connection.close()
+
+
+def count_events(database):
+    """Return the number of stored activity entries."""
+    connection = connect(database)
+    try:
+        return connection.execute("SELECT COUNT(*) FROM events").fetchone()[0]
+    finally:
+        connection.close()
