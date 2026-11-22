@@ -24,4 +24,4 @@ Set `DEVTRACK_SECRET_KEY` to a private random value before deployment. Set `DEVT
 
 ## Commands
 
-Use `flask --app run init-db` to initialize the configured database and `flask --app run count-events` to print the saved log count.
+Use `flask --app run init-db` to initialize the configured database and `flask --app run count-events` to print the saved log count, or `flask --app run count-monitors` to print configured monitor totals.
