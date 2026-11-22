@@ -21,7 +21,7 @@ Set `DEVTRACK_SECRET_KEY` to a private random value before deployment. Set `DEVT
 - `POST /api/monitors` creates an HTTP or HTTPS monitor.
 - `GET /api/monitors` lists configured monitors.
 - `POST /api/monitors/<id>/results` records a monitor check.
-- `GET /api/monitors/<id>/results` lists check history.
+- `GET /api/monitors/<id>/results` lists check history with an optional `limit` parameter.
 - `GET /api/monitors/<id>/summary` returns recorded uptime metrics.
 
 ## Commands
