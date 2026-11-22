@@ -29,6 +29,11 @@ def create_app(test_config=None):
     def liveness():
         return jsonify(status="alive")
 
+    @app.get("/health/uptime")
+    def uptime():
+        elapsed = time.monotonic() - app.extensions["devtrack_started_at"]
+        return jsonify(uptime_seconds=round(elapsed, 3))
+
     @app.get("/health/ready")
     def readiness():
         return jsonify(status="ready", service="DevTrack")
