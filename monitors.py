@@ -1,4 +1,11 @@
-"""Persistence helpers for service monitors."""
+"""Persistence helpers and check runner for service monitors."""
+
+import ipaddress
+import socket
+import time
+from urllib.error import HTTPError, URLError
+from urllib.parse import urlsplit
+from urllib.request import HTTPRedirectHandler, Request, build_opener
 
 from database import connect
 
@@ -140,3 +147,54 @@ def prune_results(database, before):
             return cursor.rowcount
     finally:
         connection.close()
+
+
+class _NoRedirect(HTTPRedirectHandler):
+    def redirect_request(self, request, response, code, message, headers, new_url):
+        return None
+
+def _default_fetch(url, timeout):
+    opener = build_opener(_NoRedirect())
+    return opener.open(Request(url, headers={"User-Agent": "DevTrack-Monitor/1.0"}), timeout=timeout)
+
+def check_monitor(database, monitor_id, fetcher=None, resolver=None, timeout=5):
+    """Run one bounded HTTP check and persist its outcome."""
+    from monitors import get_monitor, record_result
+
+    monitor = get_monitor(database, monitor_id)
+    if monitor is None:
+        raise LookupError("monitor not found")
+    if not monitor["enabled"]:
+        raise ValueError("monitor is paused")
+    parsed = urlsplit(monitor["url"])
+    if parsed.scheme not in {"http", "https"} or not parsed.hostname:
+        raise ValueError("monitor URL must use HTTP or HTTPS")
+    resolve = resolver or socket.getaddrinfo
+    started = time.monotonic()
+    status_code = None
+    error = ""
+    success = False
+    try:
+        addresses = resolve(parsed.hostname, None)
+        for address in addresses:
+            ip = ipaddress.ip_address(address[4][0])
+            if not ip.is_global:
+                raise ValueError("monitor target resolves to a non-public address")
+        response = (fetcher or _default_fetch)(monitor["url"], timeout)
+        status_code = response.getcode()
+        success = 200 <= status_code < 400
+        if hasattr(response, "close"):
+            response.close()
+        if not success:
+            error = f"unexpected HTTP status {status_code}"
+    except HTTPError as exc:
+        status_code = exc.code
+        success = 300 <= exc.code < 400
+        error = "" if success else f"HTTP {exc.code}"
+    except (URLError, TimeoutError, socket.timeout) as exc:
+        error = "request timed out" if isinstance(getattr(exc, "reason", exc), (TimeoutError, socket.timeout)) else str(getattr(exc, "reason", exc))[:500]
+    except Exception as exc:
+        error = str(exc)[:500]
+    response_ms = round((time.monotonic() - started) * 1000, 2)
+    result_id = record_result(database, monitor_id, success, status_code, response_ms, error)
+    return {"id": result_id, "success": success, "status_code": status_code, "response_ms": response_ms, "error": error}
