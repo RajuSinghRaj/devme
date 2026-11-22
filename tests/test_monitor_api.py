@@ -70,3 +70,9 @@ def test_monitor_api_rejects_http_url_without_host(client):
     response = client.post("/api/monitors", json={"name": "Bad", "url": "https://"})
     assert response.status_code == 400
     assert "absolute" in response.json["error"]
+
+
+def test_monitor_update_rejects_url_without_host(client):
+    monitor_id = client.post("/api/monitors", json={"name": "Docs", "url": "https://docs.example"}).json["id"]
+    response = client.put(f"/api/monitors/{monitor_id}", json={"name": "Bad", "url": "http://"})
+    assert response.status_code == 400
