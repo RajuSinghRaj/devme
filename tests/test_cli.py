@@ -24,3 +24,10 @@ def test_export_events_cli_writes_csv(app, tmp_path):
     result = app.test_cli_runner().invoke(args=["export-events", "--output", str(target)])
     assert result.exit_code == 0
     assert "CLI export" in target.read_text(encoding="utf-8")
+
+
+def test_backup_database_cli_command(app, tmp_path):
+    target = tmp_path / "copies" / "backup.sqlite"
+    result = app.test_cli_runner().invoke(args=["backup-db", "--output", str(target)])
+    assert result.exit_code == 0
+    assert target.exists()

@@ -6,7 +6,7 @@ import uuid
 from urllib.parse import urlsplit
 from pathlib import Path
 
-from database import initialize
+from database import backup, initialize
 from monitors import create_monitor, delete_monitor, get_monitor, list_monitors, list_results, monitor_summary, record_result, update_monitor, set_monitor_enabled
 from events import create_event, delete_event, filter_events, count_events, export_events_csv, latest_event, list_categories, list_events, list_events_by_category, list_events_by_severity, search_events, update_event
 
@@ -49,6 +49,13 @@ def create_app(test_config=None):
         return {"current_year": now.year, "today_label": f"{now:%A, %B} {now.day}"}
 
     app.extensions["devtrack_started_at"] = time.monotonic()
+
+    @app.cli.command("backup-db")
+    @click.option("--output", required=True, type=click.Path(path_type=Path))
+    def backup_database_command(output):
+        """Write a consistent backup of the configured SQLite database."""
+        backup(app.config["DATABASE"], output)
+        click.echo(f"Database backup written to {output}")
 
     @app.cli.command("init-db")
     def initialize_database_command():
