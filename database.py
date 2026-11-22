@@ -10,7 +10,10 @@ CREATE TABLE IF NOT EXISTS events (
     category TEXT NOT NULL DEFAULT 'note',
     created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
     severity TEXT NOT NULL DEFAULT 'normal' CHECK (severity IN ('low', 'normal', 'high'))
-);
+ );
+CREATE INDEX IF NOT EXISTS idx_events_created_at ON events (created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_events_category ON events (category);
+CREATE INDEX IF NOT EXISTS idx_events_severity ON events (severity);
 """
 
 def connect(path):

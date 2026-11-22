@@ -19,3 +19,12 @@ def test_database_rejects_unknown_severity(app):
             raise AssertionError("invalid severity was accepted")
     finally:
         connection.close()
+
+
+def test_event_lookup_indexes_exist(app):
+    connection = connect(app.config["DATABASE"])
+    try:
+        indexes = {row["name"] for row in connection.execute("PRAGMA index_list(events)")}
+        assert {"idx_events_created_at", "idx_events_category", "idx_events_severity"} <= indexes
+    finally:
+        connection.close()
