@@ -37,11 +37,14 @@ def create_app(test_config=None):
         title = payload.get("title", "")
         if not isinstance(title, str) or not title.strip():
             return jsonify(error="title is required"), 400
+        severity = payload.get("severity", "normal")
+        if severity not in {"low", "normal", "high"}:
+            return jsonify(error="severity must be low, normal, or high"), 400
         event_id = create_event(
-            app.config["DATABASE"], title.strip(),
-            str(payload.get("details", "")),
-            str(payload.get("category", "note")),
-            str(payload.get("severity", "normal")),
+            app.config["DATABASE"], title.strip()[:120],
+            str(payload.get("details", ""))[:2000],
+            str(payload.get("category", "note"))[:40],
+            severity,
         )
         return jsonify(id=event_id), 201
 
