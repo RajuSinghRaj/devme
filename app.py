@@ -8,7 +8,7 @@ from pathlib import Path
 
 from database import backup, initialize
 from monitors import create_monitor, delete_monitor, get_monitor, list_monitors, list_results, monitor_summary, prune_results, record_result, update_monitor, set_monitor_enabled
-from events import create_event, delete_event, event_breakdown, filter_events, get_event, count_events, export_events_csv, latest_event, list_categories, list_events, list_events_by_category, list_events_by_severity, search_events, update_event
+from events import create_event, delete_event, event_breakdown, filter_events, get_event, update_event, count_events, export_events_csv, latest_event, list_categories, list_events, list_events_by_category, list_events_by_severity, search_events, update_event
 
 from flask import Flask, g, jsonify, make_response, redirect, render_template, request, url_for
 import click
@@ -172,6 +172,24 @@ def create_app(test_config=None):
     @app.get("/api/summary")
     def api_summary():
         return jsonify(event_count=count_events(app.config["DATABASE"]), category_count=len(list_categories(app.config["DATABASE"])), monitor_count=len(list_monitors(app.config["DATABASE"])), latest_event=latest_event(app.config["DATABASE"]))
+
+    @app.route("/events/<int:event_id>/edit", methods=["GET", "POST"])
+    def edit_event_page(event_id):
+        event = get_event(app.config["DATABASE"], event_id)
+        if event is None:
+            return render_template("404.html"), 404
+        if request.method == "POST":
+            title = request.form.get("title", "").strip()
+            severity = request.form.get("severity", "normal")
+            if not title or severity not in {"low", "normal", "high"}:
+                return render_template("event_edit.html", event=event, error="Check the title and severity."), 400
+            update_event(
+                app.config["DATABASE"], event_id, title[:120],
+                request.form.get("details", "")[:2000],
+                request.form.get("category", "note")[:40], severity,
+            )
+            return redirect(url_for("event_detail", event_id=event_id))
+        return render_template("event_edit.html", event=event)
 
     @app.get("/events/<int:event_id>")
     def event_detail(event_id):
