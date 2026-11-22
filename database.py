@@ -22,5 +22,9 @@ def connect(path):
 
 def initialize(path):
     """Create the application schema if it does not exist."""
-    with connect(path) as connection:
-        connection.executescript(SCHEMA)
+    connection = connect(path)
+    try:
+        with connection:
+            connection.executescript(SCHEMA)
+    finally:
+        connection.close()
