@@ -1,3 +1,5 @@
+from datetime import datetime, timezone
+
 from flask import Flask, jsonify, render_template
 
 
@@ -10,6 +12,10 @@ def create_app(test_config=None):
     )
     if test_config:
         app.config.update(test_config)
+
+    @app.context_processor
+    def inject_now():
+        return {"current_year": datetime.now(timezone.utc).year}
 
     @app.get("/health")
     def health():
