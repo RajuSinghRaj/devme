@@ -19,3 +19,13 @@ def test_dashboard_displays_next_check_time(client):
     client.post("/api/monitors", json={"name": "Clock", "url": "https://clock.example"})
     response = client.get("/")
     assert b"Next check" in response.data
+
+
+def test_dashboard_can_create_monitor(client):
+    response = client.post("/monitors", data={"name": "Docs", "url": "https://docs.example"}, follow_redirects=True)
+    assert response.status_code == 200
+    assert b"Docs" in response.data
+
+def test_dashboard_ignores_invalid_monitor_url(client):
+    response = client.post("/monitors", data={"name": "Bad", "url": "file:///tmp/x"}, follow_redirects=True)
+    assert b"Bad" not in response.data

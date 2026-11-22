@@ -319,6 +319,19 @@ def create_app(test_config=None):
             )
         return redirect(url_for("dashboard"))
 
+    @app.post("/monitors")
+    def create_dashboard_monitor():
+        name = request.form.get("name", "").strip()
+        url = request.form.get("url", "").strip()
+        parsed_url = urlsplit(url) if url else None
+        try:
+            interval = int(request.form.get("interval_seconds", "300"))
+        except ValueError:
+            interval = 0
+        if name and parsed_url and parsed_url.scheme in {"http", "https"} and parsed_url.hostname and interval >= 30:
+            create_monitor(app.config["DATABASE"], name[:120], url[:2048], interval)
+        return redirect(url_for("dashboard"))
+
     @app.get("/")
     def dashboard():
         query = request.args.get("q", "")[:100]
