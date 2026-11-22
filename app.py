@@ -8,7 +8,7 @@ from pathlib import Path
 
 from database import backup, initialize
 from monitors import create_monitor, delete_monitor, get_monitor, list_monitors, list_results, monitor_summary, prune_results, record_result, update_monitor, set_monitor_enabled
-from events import create_event, delete_event, event_breakdown, filter_events, count_events, export_events_csv, latest_event, list_categories, list_events, list_events_by_category, list_events_by_severity, search_events, update_event
+from events import create_event, delete_event, event_breakdown, filter_events, get_event, count_events, export_events_csv, latest_event, list_categories, list_events, list_events_by_category, list_events_by_severity, search_events, update_event
 
 from flask import Flask, g, jsonify, make_response, redirect, render_template, request, url_for
 import click
@@ -172,6 +172,13 @@ def create_app(test_config=None):
     @app.get("/api/summary")
     def api_summary():
         return jsonify(event_count=count_events(app.config["DATABASE"]), category_count=len(list_categories(app.config["DATABASE"])), monitor_count=len(list_monitors(app.config["DATABASE"])), latest_event=latest_event(app.config["DATABASE"]))
+
+    @app.get("/events/<int:event_id>")
+    def event_detail(event_id):
+        event = get_event(app.config["DATABASE"], event_id)
+        if event is None:
+            return render_template("404.html"), 404
+        return render_template("event.html", event=event)
 
     @app.get("/monitors/<int:monitor_id>")
     def monitor_detail(monitor_id):
