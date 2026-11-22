@@ -11,7 +11,10 @@
     <header class="topbar"><a class="brand" href="/">DEVTRACK<span>.</span></a><span class="caption">PERSONAL OPS LOG</span></header>
     <section class="intro"><p class="eyebrow">MONDAY, NOVEMBER 22</p><h1>Build with<br>clarity.</h1><p class="lede">A quiet space to track your work and keep an eye on what matters.</p></section>
     <section class="overview" aria-label="Overview"><article><span>OPEN LOGS</span><strong>00</strong></article><article><span>SERVICES</span><strong>00</strong></article><article><span>HEALTH</span><strong class="health">ALL CLEAR</strong></article></section>
-    <section class="activity"><div class="section-head"><h2>Recent activity</h2><button type="button">? New entry</button></div><div class="empty"><span class="empty-mark">?</span><p>Your log starts here.</p><small>Add an entry to capture a decision, a fix, or a thought worth keeping.</small></div></section>
+    <section class="activity"><div class="section-head"><h2>Recent activity</h2><a class="new-entry" href="#new-entry">? New entry</a></div>{% if events %}
+      <ol class="event-list">{% for event in events %}<li><div><strong>{{ event.title }}</strong><p>{{ event.details }}</p></div><span class="event-meta">{{ event.category|upper }} ? {{ event.severity|upper }}</span></li>{% endfor %}</ol>
+      {% else %}<div class="empty"><span class="empty-mark">?</span><p>Your log starts here.</p><small>Add an entry to capture a decision, a fix, or a thought worth keeping.</small></div>{% endif %}
+      <form id="new-entry" class="entry-form" action="{{ url_for('create_dashboard_event') }}" method="post"><label for="title">New log entry</label><input id="title" name="title" maxlength="120" placeholder="What did you work on?" required><textarea name="details" maxlength="2000" placeholder="Add a few details (optional)"></textarea><button type="submit">Save entry</button></form></section>
     <footer>DEVTRACK <span>?</span> KEEP A CLEAR RECORD <span>?</span> {{ current_year }}</footer>
   </main>
 </body>
