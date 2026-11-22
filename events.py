@@ -71,3 +71,17 @@ def delete_event(database, event_id):
             return cursor.rowcount == 1
     finally:
         connection.close()
+
+
+def update_event(database, event_id, title, details='', category='note', severity='normal'):
+    """Replace editable event fields and report whether it existed."""
+    connection = connect(database)
+    try:
+        with connection:
+            cursor = connection.execute(
+                "UPDATE events SET title = ?, details = ?, category = ?, severity = ? WHERE id = ?",
+                (title, details, category, severity, event_id),
+            )
+            return cursor.rowcount == 1
+    finally:
+        connection.close()
