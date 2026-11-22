@@ -14,3 +14,10 @@ def test_monitor_detail_shows_check_schedule(client):
     monitor_id = client.post("/api/monitors", json={"name": "Docs", "url": "https://docs.example"}).json["id"]
     response = client.get(f"/monitors/{monitor_id}")
     assert b"Next check" in response.data
+
+
+def test_monitor_detail_escapes_monitor_name(client):
+    client.post("/api/monitors", json={"name": "<script>alert(1)</script>", "url": "https://safe.example"})
+    response = client.get("/")
+    assert b"<script>alert(1)</script>" not in response.data
+    assert b"&lt;script&gt;" in response.data
