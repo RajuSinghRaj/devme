@@ -41,6 +41,12 @@ def create_app(test_config=None):
 
     app.extensions["devtrack_started_at"] = time.monotonic()
 
+    @app.errorhandler(404)
+    def handle_not_found(error):
+        if request.path.startswith("/api/"):
+            return jsonify(error="not found", request_id=g.request_id), 404
+        return render_template("404.html"), 404
+
     @app.get("/health")
     def health():
         return jsonify(status="ok", service="DevTrack")
