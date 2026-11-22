@@ -45,3 +45,11 @@ def test_export_events_cli_can_write_to_stdout(app):
     result = app.test_cli_runner().invoke(args=["export-events"])
     assert result.exit_code == 0
     assert "Stdout export" in result.output
+
+
+def test_check_monitor_cli_reports_mocked_result(app, monkeypatch):
+    import app as app_module
+    monkeypatch.setattr(app_module, "check_monitor", lambda database, monitor_id: {"success": True, "status_code": 200, "response_ms": 12.5})
+    result = app.test_cli_runner().invoke(args=["check-monitor", "1"])
+    assert result.exit_code == 0
+    assert "UP status=200 duration_ms=12.5" in result.output

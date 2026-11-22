@@ -7,7 +7,7 @@ from urllib.parse import urlsplit
 from pathlib import Path
 
 from database import backup, initialize
-from monitors import create_monitor, delete_monitor, get_monitor, list_monitors, list_results, monitor_summary, prune_results, record_result, update_monitor, set_monitor_enabled
+from monitors import create_monitor, delete_monitor, get_monitor, list_monitors, list_results, monitor_summary, prune_results, record_result, update_monitor, check_monitor, set_monitor_enabled
 from events import create_event, delete_event, event_breakdown, filter_events, get_event, update_event, count_events, export_events_csv, latest_event, list_categories, list_events, list_events_by_category, list_events_by_severity, search_events, update_event
 
 from flask import Flask, g, jsonify, make_response, redirect, render_template, request, url_for
@@ -49,6 +49,17 @@ def create_app(test_config=None):
         return {"current_year": now.year, "today_label": f"{now:%A, %B} {now.day}"}
 
     app.extensions["devtrack_started_at"] = time.monotonic()
+
+    @app.cli.command("check-monitor")
+    @click.argument("monitor_id", type=int)
+    def check_monitor_command(monitor_id):
+        """Run one check for MONITOR_ID."""
+        try:
+            result = check_monitor(app.config["DATABASE"], monitor_id)
+        except (LookupError, ValueError) as exc:
+            raise click.ClickException(str(exc)) from exc
+        state = "UP" if result["success"] else "DOWN"
+        click.echo(f"{state} status={result['status_code']} duration_ms={result['response_ms']}")
 
     @app.cli.command("prune-checks")
     @click.option("--before", required=True, help="ISO timestamp cutoff, for example 2025-01-01 00:00:00.")
