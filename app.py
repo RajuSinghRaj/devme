@@ -25,6 +25,10 @@ def create_app(test_config=None):
     def health():
         return jsonify(status="ok", service="DevTrack")
 
+    @app.get("/version")
+    def version():
+        return jsonify(name="DevTrack", version="0.1.0")
+
     @app.get("/health/live")
     def liveness():
         return jsonify(status="alive")
