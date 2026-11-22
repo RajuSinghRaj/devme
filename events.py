@@ -176,7 +176,7 @@ def list_events_by_severity(database, severity, limit=50, offset=0):
         connection.close()
 
 
-def filter_events(database, query='', category='', severity='', limit=50, offset=0):
+def filter_events(database, query='', category='', severity='', limit=50, offset=0, from_date=None, to_date=None):
     """Apply text, category, and severity filters together."""
     conditions = []
     parameters = []
@@ -191,6 +191,12 @@ def filter_events(database, query='', category='', severity='', limit=50, offset
     if severity in {"low", "normal", "high"}:
         conditions.append("severity = ?")
         parameters.append(severity)
+    if from_date:
+        conditions.append("date(created_at) >= date(?)")
+        parameters.append(from_date)
+    if to_date:
+        conditions.append("date(created_at) <= date(?)")
+        parameters.append(to_date)
     where = " WHERE " + " AND ".join(conditions) if conditions else ""
     bounded_limit = max(1, min(int(limit), 100))
     bounded_offset = max(0, int(offset))

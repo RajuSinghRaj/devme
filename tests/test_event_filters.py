@@ -20,3 +20,12 @@ def test_dashboard_combines_search_category_and_severity(client):
     response = client.get("/?q=Cache&category=fix&severity=high")
     assert b"Cache fix" in response.data
     assert b"Cache note" not in response.data
+
+
+def test_repository_filters_by_date_range(client, app):
+    from datetime import datetime, timezone
+    from events import filter_events
+    client.post("/api/events", json={"title": "Today"})
+    today = datetime.now(timezone.utc).date().isoformat()
+    assert [row["title"] for row in filter_events(app.config["DATABASE"], from_date=today, to_date=today)] == ["Today"]
+    assert filter_events(app.config["DATABASE"], from_date="2000-01-01", to_date="2000-01-02") == []
