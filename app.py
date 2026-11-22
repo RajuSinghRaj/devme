@@ -9,6 +9,7 @@ from monitors import create_monitor, delete_monitor, list_monitors, list_results
 from events import create_event, delete_event, count_events, export_events_csv, latest_event, list_categories, list_events, list_events_by_category, list_events_by_severity, search_events, update_event
 
 from flask import Flask, g, jsonify, make_response, redirect, render_template, request, url_for
+import click
 
 
 def create_app(test_config=None):
@@ -45,6 +46,11 @@ def create_app(test_config=None):
         return {"current_year": now.year, "today_label": f"{now:%A, %B} {now.day}"}
 
     app.extensions["devtrack_started_at"] = time.monotonic()
+
+    @app.cli.command("count-events")
+    def count_events_command():
+        """Print the number of saved developer log entries."""
+        click.echo(count_events(app.config["DATABASE"]))
 
     @app.errorhandler(404)
     def handle_not_found(error):
