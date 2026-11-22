@@ -12,3 +12,8 @@ def test_dashboard_entry_persists_category_and_severity(client):
 def test_dashboard_rejects_blank_entry_title(client):
     response = client.post("/events", data={"title": ""}, follow_redirects=True)
     assert b"Add a title before saving" in response.data
+
+
+def test_entry_form_includes_existing_custom_categories(client):
+    client.post("/api/events", json={"title": "Document", "category": "release"})
+    assert b'value="release"' in client.get("/").data
