@@ -46,3 +46,9 @@ def test_monitor_result_schema_exists(app):
         assert {"id", "monitor_id", "success", "status_code", "response_ms", "checked_at", "error"} <= columns
     finally:
         connection.close()
+
+
+def test_initialize_creates_missing_parent_directory(tmp_path):
+    target = tmp_path / "nested" / "state" / "db.sqlite"
+    initialize(target)
+    assert target.exists()

@@ -1,6 +1,7 @@
 """SQLite setup helpers for DevTrack."""
 
 import sqlite3
+from pathlib import Path
 
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS events (
@@ -42,8 +43,10 @@ def connect(path):
     return connection
 
 def initialize(path):
-    """Create the application schema if it does not exist."""
-    connection = connect(path)
+    """Create parent folders and initialize the application schema."""
+    database_path = Path(path)
+    database_path.parent.mkdir(parents=True, exist_ok=True)
+    connection = connect(str(database_path))
     try:
         with connection:
             connection.executescript(SCHEMA)
