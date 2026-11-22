@@ -88,8 +88,8 @@ def create_app(test_config=None):
             return jsonify(error="severity must be low, normal, or high"), 400
         event_id = create_event(
             app.config["DATABASE"], title.strip()[:120],
-            str(payload.get("details", ""))[:2000],
-            str(payload.get("category", "note"))[:40],
+            payload.get("details", "")[:2000] if isinstance(payload.get("details", ""), str) else "",
+            payload.get("category", "note")[:40] if isinstance(payload.get("category", "note"), str) else "note",
             severity,
         )
         response = jsonify(id=event_id)
@@ -109,8 +109,8 @@ def create_app(test_config=None):
             return jsonify(error="invalid severity"), 400
         updated = update_event(
             app.config["DATABASE"], event_id, title.strip()[:120],
-            str(payload.get("details", ""))[:2000],
-            str(payload.get("category", "note"))[:40], severity,
+            payload.get("details", "")[:2000] if isinstance(payload.get("details", ""), str) else "",
+            payload.get("category", "note")[:40] if isinstance(payload.get("category", "note"), str) else "note", severity,
         )
         if not updated:
             return jsonify(error="event not found"), 404
