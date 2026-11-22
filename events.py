@@ -144,5 +144,11 @@ def export_events_csv(database):
     writer = csv.writer(output)
     writer.writerow(("id", "title", "details", "category", "severity", "created_at"))
     for event in list_events(database, 100):
-        writer.writerow(tuple(event[key] for key in ("id", "title", "details", "category", "severity", "created_at")))
+        values = []
+        for key in ("id", "title", "details", "category", "severity", "created_at"):
+            value = event[key]
+            if isinstance(value, str) and value.startswith(("=", "+", "-", "@", "\t", "\r")):
+                value = "'" + value
+            values.append(value)
+        writer.writerow(values)
     return output.getvalue()
