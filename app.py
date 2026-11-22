@@ -124,6 +124,7 @@ def create_app(test_config=None):
                 app.config["DATABASE"], title[:120],
                 request.form.get("details", "")[:2000],
                 request.form.get("category", "note")[:40],
+                request.form.get("severity", "normal"),
             )
         return redirect(url_for("dashboard"))
 
