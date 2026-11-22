@@ -14,3 +14,8 @@ def test_event_api_handles_non_string_optional_fields(client):
     assert response.status_code == 201
     event_id = response.json["id"]
     assert client.get(f"/api/events/{event_id}").json["event"]["details"] == ""
+
+
+def test_event_api_rejects_non_string_severity(client):
+    response = client.post("/api/events", json={"title": "Bad", "severity": []})
+    assert response.status_code == 400

@@ -3,6 +3,7 @@ import os
 import re
 import time
 import uuid
+from urllib.parse import urlsplit
 from pathlib import Path
 
 from database import initialize
@@ -96,7 +97,7 @@ def create_app(test_config=None):
         if not isinstance(title, str) or not title.strip():
             return jsonify(error="title is required"), 400
         severity = payload.get("severity", "normal")
-        if severity not in {"low", "normal", "high"}:
+        if not isinstance(severity, str) or severity not in {"low", "normal", "high"}:
             return jsonify(error="severity must be low, normal, or high"), 400
         event_id = create_event(
             app.config["DATABASE"], title.strip()[:120],
@@ -117,7 +118,7 @@ def create_app(test_config=None):
         severity = payload.get("severity", "normal")
         if not isinstance(title, str) or not title.strip():
             return jsonify(error="title is required"), 400
-        if severity not in {"low", "normal", "high"}:
+        if not isinstance(severity, str) or severity not in {"low", "normal", "high"}:
             return jsonify(error="invalid severity"), 400
         updated = update_event(
             app.config["DATABASE"], event_id, title.strip()[:120],
