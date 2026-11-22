@@ -28,3 +28,12 @@ def test_event_lookup_indexes_exist(app):
         assert {"idx_events_created_at", "idx_events_category", "idx_events_severity"} <= indexes
     finally:
         connection.close()
+
+
+def test_monitor_schema_is_initialized(app):
+    connection = connect(app.config["DATABASE"])
+    try:
+        columns = {row["name"] for row in connection.execute("PRAGMA table_info(monitors)")}
+        assert {"id", "name", "url", "interval_seconds", "enabled", "created_at"} <= columns
+    finally:
+        connection.close()

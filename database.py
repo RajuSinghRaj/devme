@@ -14,6 +14,14 @@ CREATE TABLE IF NOT EXISTS events (
 CREATE INDEX IF NOT EXISTS idx_events_created_at ON events (created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_events_category ON events (category);
 CREATE INDEX IF NOT EXISTS idx_events_severity ON events (severity);
+CREATE TABLE IF NOT EXISTS monitors (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    url TEXT NOT NULL,
+    interval_seconds INTEGER NOT NULL DEFAULT 300 CHECK (interval_seconds >= 30),
+    enabled INTEGER NOT NULL DEFAULT 1 CHECK (enabled IN (0, 1)),
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
 """
 
 def connect(path):
