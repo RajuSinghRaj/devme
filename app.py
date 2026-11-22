@@ -4,7 +4,7 @@ import time
 from pathlib import Path
 
 from database import initialize
-from events import create_event, delete_event, list_categories, list_events, list_events_by_category, search_events, update_event
+from events import create_event, delete_event, count_events, list_categories, list_events, list_events_by_category, search_events, update_event
 
 from flask import Flask, jsonify, redirect, render_template, request, url_for
 
@@ -86,6 +86,10 @@ def create_app(test_config=None):
         if event is None:
             return jsonify(error="event not found"), 404
         return jsonify(event=event)
+
+    @app.get("/api/summary")
+    def api_summary():
+        return jsonify(event_count=count_events(app.config["DATABASE"]))
 
     @app.get("/api/categories")
     def api_categories():
