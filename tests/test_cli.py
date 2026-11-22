@@ -37,3 +37,11 @@ def test_prune_checks_cli_command(app):
     result = app.test_cli_runner().invoke(args=["prune-checks", "--before", "2999-01-01 00:00:00"])
     assert result.exit_code == 0
     assert "Removed 0" in result.output
+
+
+def test_export_events_cli_can_write_to_stdout(app):
+    from events import create_event
+    create_event(app.config["DATABASE"], "Stdout export")
+    result = app.test_cli_runner().invoke(args=["export-events"])
+    assert result.exit_code == 0
+    assert "Stdout export" in result.output
