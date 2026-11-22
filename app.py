@@ -4,6 +4,7 @@ import time
 from pathlib import Path
 
 from database import initialize
+from events import create_event, list_events
 
 from flask import Flask, jsonify, render_template
 
@@ -29,6 +30,10 @@ def create_app(test_config=None):
     @app.get("/health")
     def health():
         return jsonify(status="ok", service="DevTrack")
+
+    @app.get("/api/events")
+    def api_events():
+        return jsonify(events=list_events(app.config["DATABASE"]))
 
     @app.get("/version")
     def version():
