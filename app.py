@@ -50,6 +50,16 @@ def create_app(test_config=None):
 
     app.extensions["devtrack_started_at"] = time.monotonic()
 
+    @app.cli.command("check-due")
+    def check_due_command():
+        """Run checks for enabled monitors whose interval has elapsed."""
+        due = [monitor for monitor in list_monitors(app.config["DATABASE"]) if monitor["enabled"] and monitor["is_due"]]
+        for monitor in due:
+            result = check_monitor(app.config["DATABASE"], monitor["id"])
+            state = "UP" if result["success"] else "DOWN"
+            click.echo(f"{monitor['name']}: {state}")
+        click.echo(f"Checked {len(due)} monitor(s)")
+
     @app.cli.command("check-monitor")
     @click.argument("monitor_id", type=int)
     def check_monitor_command(monitor_id):

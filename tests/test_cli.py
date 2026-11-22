@@ -53,3 +53,9 @@ def test_check_monitor_cli_reports_mocked_result(app, monkeypatch):
     result = app.test_cli_runner().invoke(args=["check-monitor", "1"])
     assert result.exit_code == 0
     assert "UP status=200 duration_ms=12.5" in result.output
+
+
+def test_check_due_cli_reports_no_due_monitors(app):
+    result = app.test_cli_runner().invoke(args=["check-due"])
+    assert result.exit_code == 0
+    assert "Checked 0 monitor(s)" in result.output
