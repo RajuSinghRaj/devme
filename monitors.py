@@ -105,3 +105,16 @@ def monitor_summary(database, monitor_id):
 
 def get_monitor(database, monitor_id):
     return next((item for item in list_monitors(database) if item["id"] == monitor_id), None)
+
+
+def update_monitor(database, monitor_id, name, url, interval_seconds):
+    connection = connect(database)
+    try:
+        with connection:
+            cursor = connection.execute(
+                "UPDATE monitors SET name = ?, url = ?, interval_seconds = ? WHERE id = ?",
+                (name, url, interval_seconds, monitor_id),
+            )
+            return cursor.rowcount == 1
+    finally:
+        connection.close()

@@ -47,3 +47,13 @@ def test_monitor_can_be_retrieved_by_id(app):
     monitor_id = create_monitor(app.config["DATABASE"], "Docs", "https://docs.example")
     assert get_monitor(app.config["DATABASE"], monitor_id)["name"] == "Docs"
     assert get_monitor(app.config["DATABASE"], 999) is None
+
+
+def test_monitor_metadata_can_be_updated(app):
+    from monitors import get_monitor, update_monitor
+    monitor_id = create_monitor(app.config["DATABASE"], "Docs", "https://docs.example")
+    assert update_monitor(app.config["DATABASE"], monitor_id, "Status", "https://status.example", 600)
+    monitor = get_monitor(app.config["DATABASE"], monitor_id)
+    assert monitor["name"] == "Status"
+    assert monitor["url"] == "https://status.example"
+    assert monitor["interval_seconds"] == 600
