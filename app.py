@@ -5,7 +5,7 @@ import uuid
 from pathlib import Path
 
 from database import initialize
-from monitors import create_monitor, delete_monitor, list_monitors, set_monitor_enabled
+from monitors import create_monitor, delete_monitor, list_monitors, list_results, record_result, set_monitor_enabled
 from events import create_event, delete_event, count_events, export_events_csv, latest_event, list_categories, list_events, list_events_by_category, list_events_by_severity, search_events, update_event
 
 from flask import Flask, g, jsonify, make_response, redirect, render_template, request, url_for
@@ -118,6 +118,30 @@ def create_app(test_config=None):
     @app.get("/api/summary")
     def api_summary():
         return jsonify(event_count=count_events(app.config["DATABASE"]), latest_event=latest_event(app.config["DATABASE"]))
+
+    @app.get("/api/monitors/<int:monitor_id>/results")
+    def api_monitor_results(monitor_id):
+        known = any(row["id"] == monitor_id for row in list_monitors(app.config["DATABASE"]))
+        if not known:
+            return jsonify(error="monitor not found"), 404
+        return jsonify(results=list_results(app.config["DATABASE"], monitor_id))
+
+    @app.post("/api/monitors/<int:monitor_id>/results")
+    def api_record_monitor_result(monitor_id):
+        payload = request.get_json(silent=True)
+        if not isinstance(payload, dict) or not isinstance(payload.get("success"), bool):
+            return jsonify(error="success boolean is required"), 400
+        known = any(row["id"] == monitor_id for row in list_monitors(app.config["DATABASE"]))
+        if not known:
+            return jsonify(error="monitor not found"), 404
+        status_code = payload.get("status_code")
+        response_ms = payload.get("response_ms")
+        if status_code is not None and (not isinstance(status_code, int) or not 100 <= status_code <= 599):
+            return jsonify(error="status_code must be between 100 and 599"), 400
+        if response_ms is not None and (not isinstance(response_ms, (int, float)) or response_ms < 0):
+            return jsonify(error="response_ms must be nonnegative"), 400
+        result_id = record_result(app.config["DATABASE"], monitor_id, payload["success"], status_code, response_ms, str(payload.get("error", "")))
+        return jsonify(id=result_id), 201
 
     @app.patch("/api/monitors/<int:monitor_id>")
     def api_update_monitor(monitor_id):

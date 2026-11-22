@@ -25,3 +25,12 @@ def test_monitor_api_rejects_interval_below_minimum(client):
     response = client.post("/api/monitors", json={"name": "Fast", "url": "https://example.com", "interval_seconds": 5})
     assert response.status_code == 400
     assert "at least 30" in response.json["error"]
+
+
+def test_monitor_results_api_records_and_lists_results(client):
+    monitor_id = client.post("/api/monitors", json={"name": "Docs", "url": "https://docs.example"}).json["id"]
+    recorded = client.post(f"/api/monitors/{monitor_id}/results", json={"success": True, "status_code": 200, "response_ms": 18.3})
+    assert recorded.status_code == 201
+    results = client.get(f"/api/monitors/{monitor_id}/results").json["results"]
+    assert results[0]["status_code"] == 200
+    assert results[0]["response_ms"] == 18.3
