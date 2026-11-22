@@ -18,3 +18,5 @@
 .monitor-panel .monitor-list strong a{color:var(--ink);text-decoration:none}.monitor-panel .monitor-list strong a:hover{text-decoration:underline}
 
 .pagination{display:flex;align-items:center;justify-content:center;gap:24px;padding:26px 0;font:10px 'DM Mono',monospace}.pagination a{color:var(--ink);text-decoration:none;border-bottom:1px solid var(--ink);padding-bottom:3px}.pagination span{color:var(--muted)}
+
+.monitor-list small{font:9px 'DM Mono',monospace;color:var(--muted)}
