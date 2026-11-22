@@ -8,3 +8,9 @@ def test_monitor_detail_displays_recent_results(client):
 
 def test_unknown_monitor_detail_returns_404(client):
     assert client.get("/monitors/999").status_code == 404
+
+
+def test_monitor_detail_shows_check_schedule(client):
+    monitor_id = client.post("/api/monitors", json={"name": "Docs", "url": "https://docs.example"}).json["id"]
+    response = client.get(f"/monitors/{monitor_id}")
+    assert b"Next check" in response.data
