@@ -117,6 +117,8 @@ def create_app(test_config=None):
     @app.post("/events")
     def create_dashboard_event():
         title = request.form.get("title", "").strip()
+        if not title:
+            return redirect(url_for("dashboard", error="title-required"))
         if title:
             create_event(
                 app.config["DATABASE"], title[:120],
