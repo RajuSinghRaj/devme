@@ -55,6 +55,18 @@ def create_app(test_config=None):
         initialize(app.config["DATABASE"])
         click.echo("Database ready")
 
+    @app.cli.command("export-events")
+    @click.option("--output", type=click.Path(path_type=Path), help="Write CSV to this path instead of stdout.")
+    def export_events_command(output):
+        """Export log entries as CSV."""
+        csv_text = export_events_csv(app.config["DATABASE"])
+        if output:
+            output.parent.mkdir(parents=True, exist_ok=True)
+            output.write_text(csv_text, encoding="utf-8", newline="")
+            click.echo(f"Exported events to {output}")
+        else:
+            click.echo(csv_text, nl=False)
+
     @app.cli.command("count-monitors")
     def count_monitors_command():
         """Print the number of configured monitors."""
