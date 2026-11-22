@@ -29,3 +29,10 @@ def test_dashboard_can_create_monitor(client):
 def test_dashboard_ignores_invalid_monitor_url(client):
     response = client.post("/monitors", data={"name": "Bad", "url": "file:///tmp/x"}, follow_redirects=True)
     assert b"Bad" not in response.data
+
+
+def test_dashboard_monitor_form_is_rendered(client):
+    response = client.get("/")
+    assert b'id="monitor-name"' in response.data
+    assert b'name="url"' in response.data
+
