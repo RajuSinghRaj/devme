@@ -23,3 +23,15 @@ def test_monitor_results_are_listed_newest_first(app):
     assert len(results) == 2
     assert results[0]["success"] == 0
     assert results[0]["error"] == "unavailable"
+
+
+def test_monitor_summary_calculates_success_rate(app):
+    from monitors import monitor_summary
+    monitor_id = create_monitor(app.config["DATABASE"], "Docs", "https://docs.example")
+    assert monitor_summary(app.config["DATABASE"], monitor_id)["uptime_percent"] is None
+    record_result(app.config["DATABASE"], monitor_id, True, 200, 20)
+    record_result(app.config["DATABASE"], monitor_id, False, 503, 80)
+    summary = monitor_summary(app.config["DATABASE"], monitor_id)
+    assert summary["total_checks"] == 2
+    assert summary["uptime_percent"] == 50.0
+    assert summary["latest"]["success"] == 0

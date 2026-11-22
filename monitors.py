@@ -74,3 +74,27 @@ def list_results(database, monitor_id, limit=50):
         return [dict(row) for row in rows]
     finally:
         connection.close()
+
+
+def monitor_summary(database, monitor_id):
+    connection = connect(database)
+    try:
+        row = connection.execute(
+            "SELECT COUNT(*) AS total, COALESCE(SUM(success), 0) AS successes "
+            "FROM monitor_results WHERE monitor_id = ?",
+            (monitor_id,),
+        ).fetchone()
+        latest = connection.execute(
+            "SELECT success, status_code, response_ms, checked_at, error "
+            "FROM monitor_results WHERE monitor_id = ? ORDER BY id DESC LIMIT 1",
+            (monitor_id,),
+        ).fetchone()
+        total = row["total"]
+        return {
+            "total_checks": total,
+            "successful_checks": row["successes"],
+            "uptime_percent": round(row["successes"] * 100 / total, 2) if total else None,
+            "latest": dict(latest) if latest else None,
+        }
+    finally:
+        connection.close()
