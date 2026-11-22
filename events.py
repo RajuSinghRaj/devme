@@ -85,3 +85,15 @@ def update_event(database, event_id, title, details='', category='note', severit
             return cursor.rowcount == 1
     finally:
         connection.close()
+
+
+def list_categories(database):
+    """Return distinct event categories in alphabetical order."""
+    connection = connect(database)
+    try:
+        rows = connection.execute(
+            "SELECT DISTINCT category FROM events ORDER BY category COLLATE NOCASE"
+        ).fetchall()
+        return [row[0] for row in rows]
+    finally:
+        connection.close()
