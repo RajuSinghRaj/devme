@@ -45,3 +45,12 @@ def test_old_monitor_results_can_be_pruned(app):
     assert removed == 1
     assert list_results(app.config["DATABASE"], monitor_id) == []
 
+
+
+def test_monitor_summary_counts_current_failure_streak(app):
+    from monitors import monitor_summary
+    monitor_id = create_monitor(app.config["DATABASE"], "Docs", "https://docs.example")
+    record_result(app.config["DATABASE"], monitor_id, True, 200, 10)
+    record_result(app.config["DATABASE"], monitor_id, False, 503, 20)
+    record_result(app.config["DATABASE"], monitor_id, False, 503, 25)
+    assert monitor_summary(app.config["DATABASE"], monitor_id)["failure_streak"] == 2

@@ -93,12 +93,22 @@ def monitor_summary(database, monitor_id):
             "FROM monitor_results WHERE monitor_id = ? ORDER BY id DESC LIMIT 1",
             (monitor_id,),
         ).fetchone()
+        recent = connection.execute(
+            "SELECT success FROM monitor_results WHERE monitor_id = ? ORDER BY id DESC LIMIT 100",
+            (monitor_id,),
+        ).fetchall()
+        failure_streak = 0
+        for result in recent:
+            if result["success"]:
+                break
+            failure_streak += 1
         total = row["total"]
         return {
             "total_checks": total,
             "successful_checks": row["successes"],
             "uptime_percent": round(row["successes"] * 100 / total, 2) if total else None,
             "latest": dict(latest) if latest else None,
+            "failure_streak": failure_streak,
         }
     finally:
         connection.close()
