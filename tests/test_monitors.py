@@ -40,3 +40,10 @@ def test_monitor_names_and_urls_are_returned_as_saved(app):
     monitor = list_monitors(app.config["DATABASE"])[0]
     assert monitor["name"] == name
     assert monitor["url"] == url
+
+
+def test_monitor_can_be_retrieved_by_id(app):
+    from monitors import get_monitor
+    monitor_id = create_monitor(app.config["DATABASE"], "Docs", "https://docs.example")
+    assert get_monitor(app.config["DATABASE"], monitor_id)["name"] == "Docs"
+    assert get_monitor(app.config["DATABASE"], 999) is None

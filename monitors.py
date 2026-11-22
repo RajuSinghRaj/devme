@@ -101,3 +101,7 @@ def monitor_summary(database, monitor_id):
         }
     finally:
         connection.close()
+
+
+def get_monitor(database, monitor_id):
+    return next((item for item in list_monitors(database) if item["id"] == monitor_id), None)
