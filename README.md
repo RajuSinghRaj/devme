@@ -33,3 +33,5 @@ Use `flask --app run export-events` to print event CSV, or pass `--output path/t
 Create a consistent SQLite copy with `flask --app run backup-db --output backups/devtrack.sqlite`. To restore it, stop the app, replace the configured database file with the backup, then start the app again.
 
 Prune monitor history with `flask --app run prune-checks --before "2025-01-01 00:00:00"`.
+
+Run one monitor check with `flask --app run check-monitor 1`. Schedule `flask --app run check-due` with cron or a system scheduler to run checks whose interval has elapsed.
