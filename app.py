@@ -12,6 +12,7 @@ from events import create_event, delete_event, event_breakdown, prune_events, fi
 
 from flask import Flask, g, jsonify, make_response, redirect, render_template, request, url_for
 import click
+from datetime import date
 
 
 def create_app(test_config=None):
@@ -367,8 +368,17 @@ def create_app(test_config=None):
         query = request.args.get("q", "")[:100]
         category = request.args.get("category", "")[:40]
         severity = request.args.get("severity", "")[:10]
+        from_date = request.args.get("from", "")
+        to_date = request.args.get("to", "")
+        try:
+            if from_date:
+                date.fromisoformat(from_date)
+            if to_date:
+                date.fromisoformat(to_date)
+        except ValueError:
+            return jsonify(error="dates must use YYYY-MM-DD format"), 400
         page_size = min(max(limit, 1), 100)
-        entries = filter_events(app.config["DATABASE"], query, category, severity, page_size, (page - 1) * page_size)
+        entries = filter_events(app.config["DATABASE"], query, category, severity, page_size, (page - 1) * page_size, from_date or None, to_date or None)
         return jsonify(events=entries, page=page, limit=min(max(limit, 1), 100))
 
     @app.get("/version")
@@ -441,10 +451,19 @@ def create_app(test_config=None):
             page = 1
         page_size = 20
         offset = (page - 1) * page_size
-        entries = filter_events(app.config["DATABASE"], query, category, severity, page_size + 1, offset)
+        from_date = request.args.get("from", "")
+        to_date = request.args.get("to", "")
+        try:
+            if from_date:
+                date.fromisoformat(from_date)
+            if to_date:
+                date.fromisoformat(to_date)
+        except ValueError:
+            from_date = to_date = ""
+        entries = filter_events(app.config["DATABASE"], query, category, severity, page_size + 1, offset, from_date or None, to_date or None)
         has_next = len(entries) > page_size
         entries = entries[:page_size]
-        filters = {key: request.args[key] for key in ("q", "category", "severity") if request.args.get(key)}
+        filters = {key: request.args[key] for key in ("q", "category", "severity", "from", "to") if request.args.get(key)}
         return render_template("index.html", events=entries, query=query, categories=list_categories(app.config["DATABASE"]), category_options=sorted(set(list_categories(app.config["DATABASE"])) | {"note", "build", "fix", "decision"}, key=str.casefold), selected_category=category, selected_severity=severity, event_count=count_events(app.config["DATABASE"]), category_count=len(list_categories(app.config["DATABASE"])), monitors=list_monitors(app.config["DATABASE"]), page=page, has_next=has_next, filters=filters)
 
     return app

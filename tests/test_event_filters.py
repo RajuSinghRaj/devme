@@ -29,3 +29,14 @@ def test_repository_filters_by_date_range(client, app):
     today = datetime.now(timezone.utc).date().isoformat()
     assert [row["title"] for row in filter_events(app.config["DATABASE"], from_date=today, to_date=today)] == ["Today"]
     assert filter_events(app.config["DATABASE"], from_date="2000-01-01", to_date="2000-01-02") == []
+
+
+def test_event_api_accepts_date_range(client):
+    from datetime import datetime, timezone
+    client.post("/api/events", json={"title": "Date match"})
+    today = datetime.now(timezone.utc).date().isoformat()
+    response = client.get(f"/api/events?from={today}&to={today}")
+    assert [row["title"] for row in response.json["events"]] == ["Date match"]
+
+def test_event_api_rejects_malformed_date(client):
+    assert client.get("/api/events?from=not-a-date").status_code == 400
