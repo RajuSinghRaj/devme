@@ -4,7 +4,7 @@ import time
 from pathlib import Path
 
 from database import initialize
-from events import create_event, list_events, search_events
+from events import create_event, delete_event, list_events, search_events
 
 from flask import Flask, jsonify, redirect, render_template, request, url_for
 
@@ -47,6 +47,12 @@ def create_app(test_config=None):
             severity,
         )
         return jsonify(id=event_id), 201
+
+    @app.delete("/api/events/<int:event_id>")
+    def api_delete_event(event_id):
+        if not delete_event(app.config["DATABASE"], event_id):
+            return jsonify(error="event not found"), 404
+        return "", 204
 
     @app.get("/api/events/<int:event_id>")
     def api_event_detail(event_id):
