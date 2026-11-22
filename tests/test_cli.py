@@ -59,3 +59,9 @@ def test_check_due_cli_reports_no_due_monitors(app):
     result = app.test_cli_runner().invoke(args=["check-due"])
     assert result.exit_code == 0
     assert "Checked 0 monitor(s)" in result.output
+
+
+def test_prune_events_cli_command(app):
+    result = app.test_cli_runner().invoke(args=["prune-events", "--before", "2999-01-01 00:00:00"])
+    assert result.exit_code == 0
+    assert "Removed 0 event(s)" in result.output
