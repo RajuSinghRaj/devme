@@ -48,6 +48,14 @@ def create_app(test_config=None):
         )
         return jsonify(id=event_id), 201
 
+    @app.get("/api/events/<int:event_id>")
+    def api_event_detail(event_id):
+        from events import get_event
+        event = get_event(app.config["DATABASE"], event_id)
+        if event is None:
+            return jsonify(error="event not found"), 404
+        return jsonify(event=event)
+
     @app.get("/api/events")
     def api_events():
         try:
