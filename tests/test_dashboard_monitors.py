@@ -60,3 +60,10 @@ def test_dashboard_can_remove_monitor(client):
     monitor_id = client.post("/api/monitors", json={"name": "Remove", "url": "https://remove.example"}).json["id"]
     assert client.post(f"/monitors/{monitor_id}/delete").status_code == 302
     assert list_monitors(client.application.config["DATABASE"]) == []
+
+
+def test_dashboard_shows_monitor_control_labels(client):
+    client.post("/api/monitors", json={"name": "Buttons", "url": "https://buttons.example"})
+    response = client.get("/")
+    assert b"Pause" in response.data
+    assert b"Remove" in response.data
