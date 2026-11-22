@@ -92,6 +92,7 @@ def create_app(test_config=None):
         response = make_response(export_events_csv(app.config["DATABASE"]))
         response.headers["Content-Type"] = "text/csv; charset=utf-8"
         response.headers["Content-Disposition"] = "attachment; filename=devtrack-events.csv"
+        response.headers["X-Content-Type-Options"] = "nosniff"
         return response
 
     @app.get("/api/summary")
