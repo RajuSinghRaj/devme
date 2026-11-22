@@ -20,13 +20,14 @@ def list_monitors(database):
         rows = connection.execute(
             "SELECT m.id, m.name, m.url, m.interval_seconds, m.enabled, m.created_at, "
             "(SELECT success FROM monitor_results r WHERE r.monitor_id = m.id ORDER BY r.id DESC LIMIT 1) AS last_success, "
-            "(SELECT checked_at FROM monitor_results r WHERE r.monitor_id = m.id ORDER BY r.id DESC LIMIT 1) AS last_checked "
+            "(SELECT checked_at FROM monitor_results r WHERE r.monitor_id = m.id ORDER BY r.id DESC LIMIT 1) AS last_checked, "
+            "datetime(COALESCE((SELECT checked_at FROM monitor_results r WHERE r.monitor_id = m.id ORDER BY r.id DESC LIMIT 1), m.created_at), '+' || m.interval_seconds || ' seconds') AS next_check_at, "
+            "(m.enabled = 1 AND datetime('now') >= datetime(COALESCE((SELECT checked_at FROM monitor_results r WHERE r.monitor_id = m.id ORDER BY r.id DESC LIMIT 1), m.created_at), '+' || m.interval_seconds || ' seconds')) AS is_due "
             "FROM monitors m ORDER BY m.id DESC"
         ).fetchall()
         return [dict(row) for row in rows]
     finally:
         connection.close()
-
 
 def set_monitor_enabled(database, monitor_id, enabled):
     connection = connect(database)

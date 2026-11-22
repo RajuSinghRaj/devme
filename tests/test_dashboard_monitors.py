@@ -13,3 +13,9 @@ def test_dashboard_shows_monitor_latest_state(client):
     monitor_id = client.post("/api/monitors", json={"name": "Docs", "url": "https://docs.example"}).json["id"]
     client.post(f"/api/monitors/{monitor_id}/results", json={"success": False, "status_code": 503})
     assert b"DOWN" in client.get("/").data
+
+
+def test_dashboard_displays_next_check_time(client):
+    client.post("/api/monitors", json={"name": "Clock", "url": "https://clock.example"})
+    response = client.get("/")
+    assert b"Next check" in response.data

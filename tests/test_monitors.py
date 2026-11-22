@@ -57,3 +57,15 @@ def test_monitor_metadata_can_be_updated(app):
     assert monitor["name"] == "Status"
     assert monitor["url"] == "https://status.example"
     assert monitor["interval_seconds"] == 600
+
+
+def test_monitor_listing_includes_next_check_time(app):
+    monitor_id = create_monitor(app.config["DATABASE"], "Docs", "https://docs.example", 300)
+    monitor = next(item for item in list_monitors(app.config["DATABASE"]) if item["id"] == monitor_id)
+    assert monitor["next_check_at"] is not None
+
+
+def test_new_monitor_is_not_due_before_its_interval(app):
+    from monitors import create_monitor, list_monitors
+    create_monitor(app.config["DATABASE"], "Fresh", "https://fresh.example", 3600)
+    assert list_monitors(app.config["DATABASE"])[0]["is_due"] == 0
