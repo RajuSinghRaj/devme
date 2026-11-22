@@ -153,3 +153,20 @@ def export_events_csv(database):
             values.append(value)
         writer.writerow(values)
     return output.getvalue()
+
+
+def list_events_by_severity(database, severity, limit=50):
+    """List newest events with the requested severity."""
+    if severity not in {"low", "normal", "high"}:
+        return []
+    bounded_limit = max(1, min(int(limit), 100))
+    connection = connect(database)
+    try:
+        rows = connection.execute(
+            "SELECT id, title, details, category, severity, created_at FROM events "
+            "WHERE severity = ? ORDER BY id DESC LIMIT ?",
+            (severity, bounded_limit),
+        ).fetchall()
+        return [dict(row) for row in rows]
+    finally:
+        connection.close()
