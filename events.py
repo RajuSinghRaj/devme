@@ -106,3 +106,18 @@ def count_events(database):
         return connection.execute("SELECT COUNT(*) FROM events").fetchone()[0]
     finally:
         connection.close()
+
+
+def list_events_by_category(database, category, limit=50):
+    """List newest events from one category."""
+    bounded_limit = max(1, min(int(limit), 100))
+    connection = connect(database)
+    try:
+        rows = connection.execute(
+            "SELECT id, title, details, category, severity, created_at FROM events "
+            "WHERE category = ? ORDER BY id DESC LIMIT ?",
+            (category, bounded_limit),
+        ).fetchall()
+        return [dict(row) for row in rows]
+    finally:
+        connection.close()
