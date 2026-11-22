@@ -21,3 +21,7 @@ Set `DEVTRACK_SECRET_KEY` to a private random value before deployment. Set `DEVT
 - `POST /api/monitors/<id>/results` records a monitor check.
 - `GET /api/monitors/<id>/results` lists check history.
 - `GET /api/monitors/<id>/summary` returns recorded uptime metrics.
+
+## Commands
+
+Use `flask --app run init-db` to initialize the configured database and `flask --app run count-events` to print the saved log count.
