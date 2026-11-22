@@ -1,3 +1,6 @@
+import csv
+import io
+
 """Persistence helpers for developer activity entries."""
 
 from database import connect
@@ -133,3 +136,13 @@ def latest_event(database):
         return dict(row) if row else None
     finally:
         connection.close()
+
+
+def export_events_csv(database):
+    """Serialize stored activity entries as a UTF-8 CSV document."""
+    output = io.StringIO(newline="")
+    writer = csv.writer(output)
+    writer.writerow(("id", "title", "details", "category", "severity", "created_at"))
+    for event in list_events(database, 100):
+        writer.writerow(tuple(event[key] for key in ("id", "title", "details", "category", "severity", "created_at")))
+    return output.getvalue()
