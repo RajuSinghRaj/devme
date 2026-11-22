@@ -70,6 +70,17 @@ def create_app(test_config=None):
     def readiness():
         return jsonify(status="ready", service="DevTrack")
 
+    @app.post("/events")
+    def create_dashboard_event():
+        title = request.form.get("title", "").strip()
+        if title:
+            create_event(
+                app.config["DATABASE"], title[:120],
+                request.form.get("details", "")[:2000],
+                request.form.get("category", "note")[:40],
+            )
+        return redirect(url_for("dashboard"))
+
     @app.get("/")
     def dashboard():
         return render_template("index.html", events=list_events(app.config["DATABASE"]))
