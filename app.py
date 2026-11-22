@@ -6,7 +6,7 @@ import uuid
 from pathlib import Path
 
 from database import initialize
-from monitors import create_monitor, delete_monitor, list_monitors, list_results, monitor_summary, record_result, set_monitor_enabled
+from monitors import create_monitor, delete_monitor, get_monitor, list_monitors, list_results, monitor_summary, record_result, set_monitor_enabled
 from events import create_event, delete_event, count_events, export_events_csv, latest_event, list_categories, list_events, list_events_by_category, list_events_by_severity, search_events, update_event
 
 from flask import Flask, g, jsonify, make_response, redirect, render_template, request, url_for
@@ -214,6 +214,13 @@ def create_app(test_config=None):
             return jsonify(error="interval_seconds must be at least 30"), 400
         monitor_id = create_monitor(app.config["DATABASE"], name.strip()[:120], url[:2048], interval)
         return jsonify(id=monitor_id), 201
+
+    @app.get("/api/monitors/<int:monitor_id>")
+    def api_monitor_detail(monitor_id):
+        monitor = get_monitor(app.config["DATABASE"], monitor_id)
+        if monitor is None:
+            return jsonify(error="monitor not found"), 404
+        return jsonify(monitor=monitor)
 
     @app.get("/api/monitors")
     def api_monitors():

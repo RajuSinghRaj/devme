@@ -41,3 +41,9 @@ def test_monitor_summary_api_reports_uptime(client):
     client.post(f"/api/monitors/{monitor_id}/results", json={"success": True, "status_code": 200})
     response = client.get(f"/api/monitors/{monitor_id}/summary")
     assert response.json["summary"]["uptime_percent"] == 100.0
+
+
+def test_monitor_api_retrieves_one_monitor(client):
+    monitor_id = client.post("/api/monitors", json={"name": "Docs", "url": "https://docs.example"}).json["id"]
+    assert client.get(f"/api/monitors/{monitor_id}").json["monitor"]["name"] == "Docs"
+    assert client.get("/api/monitors/999").status_code == 404
