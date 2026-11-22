@@ -23,7 +23,8 @@ def create_app(test_config=None):
 
     @app.context_processor
     def inject_now():
-        return {"current_year": datetime.now(timezone.utc).year}
+        now = datetime.now(timezone.utc)
+        return {"current_year": now.year, "today_label": f"{now:%A, %B} {now.day}"}
 
     app.extensions["devtrack_started_at"] = time.monotonic()
 
