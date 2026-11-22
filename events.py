@@ -222,3 +222,14 @@ def event_breakdown(database):
         }
     finally:
         connection.close()
+
+
+def prune_events(database, before):
+    """Delete activity entries created before an ISO timestamp cutoff."""
+    connection = connect(database)
+    try:
+        with connection:
+            cursor = connection.execute("DELETE FROM events WHERE created_at < ?", (before,))
+            return cursor.rowcount
+    finally:
+        connection.close()
