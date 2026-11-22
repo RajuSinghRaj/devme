@@ -21,3 +21,10 @@ def test_monitor_detail_escapes_monitor_name(client):
     response = client.get("/")
     assert b"<script>alert(1)</script>" not in response.data
     assert b"&lt;script&gt;" in response.data
+
+
+def test_monitor_detail_shows_failure_streak(client):
+    monitor_id = client.post("/api/monitors", json={"name": "Docs", "url": "https://docs.example"}).json["id"]
+    client.post(f"/api/monitors/{monitor_id}/results", json={"success": False, "status_code": 503})
+    response = client.get(f"/monitors/{monitor_id}")
+    assert b"FAILURE STREAK" in response.data

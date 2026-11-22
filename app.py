@@ -178,7 +178,7 @@ def create_app(test_config=None):
         monitor = next((row for row in list_monitors(app.config["DATABASE"]) if row["id"] == monitor_id), None)
         if monitor is None:
             return render_template("404.html"), 404
-        return render_template("monitor.html", monitor=monitor, results=list_results(app.config["DATABASE"], monitor_id))
+        return render_template("monitor.html", monitor=monitor, results=list_results(app.config["DATABASE"], monitor_id), summary=monitor_summary(app.config["DATABASE"], monitor_id))
 
     @app.get("/api/monitors/<int:monitor_id>/schedule")
     def api_monitor_schedule(monitor_id):
