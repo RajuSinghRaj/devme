@@ -23,3 +23,16 @@ def list_monitors(database):
         return [dict(row) for row in rows]
     finally:
         connection.close()
+
+
+def set_monitor_enabled(database, monitor_id, enabled):
+    connection = connect(database)
+    try:
+        with connection:
+            cursor = connection.execute(
+                "UPDATE monitors SET enabled = ? WHERE id = ?",
+                (1 if enabled else 0, monitor_id),
+            )
+            return cursor.rowcount == 1
+    finally:
+        connection.close()
