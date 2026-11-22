@@ -5,6 +5,7 @@ import uuid
 from pathlib import Path
 
 from database import initialize
+from monitors import create_monitor, list_monitors
 from events import create_event, delete_event, count_events, export_events_csv, latest_event, list_categories, list_events, list_events_by_category, list_events_by_severity, search_events, update_event
 
 from flask import Flask, g, jsonify, make_response, redirect, render_template, request, url_for
@@ -117,6 +118,10 @@ def create_app(test_config=None):
     @app.get("/api/summary")
     def api_summary():
         return jsonify(event_count=count_events(app.config["DATABASE"]), latest_event=latest_event(app.config["DATABASE"]))
+
+    @app.get("/api/monitors")
+    def api_monitors():
+        return jsonify(monitors=list_monitors(app.config["DATABASE"]))
 
     @app.get("/api/categories")
     def api_categories():
