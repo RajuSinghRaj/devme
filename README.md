@@ -37,3 +37,5 @@ Prune monitor history with `flask --app run prune-checks --before "2025-01-01 00
 Run one monitor check with `flask --app run check-monitor 1`. Schedule `flask --app run check-due` with cron or a system scheduler to run checks whose interval has elapsed.
 
 Prune old event entries with `flask --app run prune-events --before "2025-01-01 00:00:00"`.
+
+For HTTPS deployments, set `DEVTRACK_COOKIE_SECURE=1` so session cookies are sent only over TLS. The app defaults to HTTP-only, SameSite=Lax session cookies.
