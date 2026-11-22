@@ -1,11 +1,14 @@
 """Persistence helpers and check runner for service monitors."""
 
 import ipaddress
+import json
 import socket
 import time
 from urllib.error import HTTPError, URLError
 from urllib.parse import urlsplit
 from urllib.request import HTTPRedirectHandler, Request, build_opener
+
+DEFAULT_CHECK_TIMEOUT = 5
 
 from database import connect
 
@@ -157,7 +160,7 @@ def _default_fetch(url, timeout):
     opener = build_opener(_NoRedirect())
     return opener.open(Request(url, headers={"User-Agent": "DevTrack-Monitor/1.0"}), timeout=timeout)
 
-def check_monitor(database, monitor_id, fetcher=None, resolver=None, timeout=5):
+def check_monitor(database, monitor_id, fetcher=None, resolver=None, timeout=DEFAULT_CHECK_TIMEOUT):
     """Run one bounded HTTP check and persist its outcome."""
     from monitors import get_monitor, record_result
 
