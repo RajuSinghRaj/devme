@@ -167,7 +167,7 @@ def create_app(test_config=None):
 
     @app.get("/api/summary")
     def api_summary():
-        return jsonify(event_count=count_events(app.config["DATABASE"]), latest_event=latest_event(app.config["DATABASE"]))
+        return jsonify(event_count=count_events(app.config["DATABASE"]), category_count=len(list_categories(app.config["DATABASE"])), monitor_count=len(list_monitors(app.config["DATABASE"])), latest_event=latest_event(app.config["DATABASE"]))
 
     @app.get("/monitors/<int:monitor_id>")
     def monitor_detail(monitor_id):
