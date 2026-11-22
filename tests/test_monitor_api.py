@@ -76,3 +76,9 @@ def test_monitor_update_rejects_url_without_host(client):
     monitor_id = client.post("/api/monitors", json={"name": "Docs", "url": "https://docs.example"}).json["id"]
     response = client.put(f"/api/monitors/{monitor_id}", json={"name": "Bad", "url": "http://"})
     assert response.status_code == 400
+
+
+def test_monitor_api_rejects_embedded_url_credentials(client):
+    response = client.post("/api/monitors", json={"name": "Private", "url": "https://user:secret@example.com"})
+    assert response.status_code == 400
+    assert "without credentials" in response.json["error"]
