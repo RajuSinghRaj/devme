@@ -12,5 +12,5 @@ Set `DEVTRACK_SECRET_KEY` to a private random value before deployment. Set `DEVT
 
 - `GET /health` reports service health.
 - `GET /api/events` lists entries. Optional `q` and `limit` query parameters filter results.
-- `POST /api/events` accepts a JSON object with `title` and optional `details`, `category`, and `severity`.
+- `POST /api/events` accepts a JSON object with `title` and optional `details`, `category`, and `severity` (`low`, `normal`, or `high`).
 - `GET`, `PUT`, and `DELETE /api/events/<id>` retrieve, update, or remove an entry.
