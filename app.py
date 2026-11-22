@@ -53,6 +53,11 @@ def create_app(test_config=None):
         initialize(app.config["DATABASE"])
         click.echo("Database ready")
 
+    @app.cli.command("count-monitors")
+    def count_monitors_command():
+        """Print the number of configured monitors."""
+        click.echo(len(list_monitors(app.config["DATABASE"])))
+
     @app.cli.command("count-events")
     def count_events_command():
         """Print the number of saved developer log entries."""
