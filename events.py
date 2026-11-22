@@ -121,3 +121,15 @@ def list_events_by_category(database, category, limit=50):
         return [dict(row) for row in rows]
     finally:
         connection.close()
+
+
+def latest_event(database):
+    """Return the most recently created event, when one exists."""
+    connection = connect(database)
+    try:
+        row = connection.execute(
+            "SELECT id, title, details, category, severity, created_at FROM events ORDER BY id DESC LIMIT 1"
+        ).fetchone()
+        return dict(row) if row else None
+    finally:
+        connection.close()
