@@ -28,3 +28,16 @@ def list_events(database, limit=50):
         return [dict(row) for row in rows]
     finally:
         connection.close()
+
+
+def get_event(database, event_id):
+    """Return one event by identifier, or None when it does not exist."""
+    connection = connect(database)
+    try:
+        row = connection.execute(
+            "SELECT id, title, details, category, severity, created_at FROM events WHERE id = ?",
+            (event_id,),
+        ).fetchone()
+        return dict(row) if row else None
+    finally:
+        connection.close()
