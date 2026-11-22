@@ -12,3 +12,10 @@ def test_monitor_api_creates_valid_monitor(client):
 def test_monitor_api_rejects_non_http_url(client):
     response = client.post("/api/monitors", json={"name": "Bad", "url": "file:///etc/passwd"})
     assert response.status_code == 400
+
+
+def test_monitor_api_pause_and_delete(client):
+    monitor_id = client.post("/api/monitors", json={"name": "Docs", "url": "https://docs.example"}).json["id"]
+    assert client.patch(f"/api/monitors/{monitor_id}", json={"enabled": False}).json["enabled"] is False
+    assert client.delete(f"/api/monitors/{monitor_id}").status_code == 204
+    assert client.delete(f"/api/monitors/{monitor_id}").status_code == 404
