@@ -8,7 +8,7 @@ from pathlib import Path
 
 from database import initialize
 from monitors import create_monitor, delete_monitor, get_monitor, list_monitors, list_results, monitor_summary, record_result, update_monitor, set_monitor_enabled
-from events import create_event, delete_event, count_events, export_events_csv, latest_event, list_categories, list_events, list_events_by_category, list_events_by_severity, search_events, update_event
+from events import create_event, delete_event, filter_events, count_events, export_events_csv, latest_event, list_categories, list_events, list_events_by_category, list_events_by_severity, search_events, update_event
 
 from flask import Flask, g, jsonify, make_response, redirect, render_template, request, url_for
 import click
@@ -284,12 +284,8 @@ def create_app(test_config=None):
         query = request.args.get("q", "")[:100]
         category = request.args.get("category", "")[:40]
         severity = request.args.get("severity", "")[:10]
-        if severity in {"low", "normal", "high"}:
-            entries = list_events_by_severity(app.config["DATABASE"], severity, limit, (page - 1) * min(max(limit, 1), 100))
-        elif category:
-            entries = list_events_by_category(app.config["DATABASE"], category, limit, (page - 1) * min(max(limit, 1), 100))
-        else:
-            entries = search_events(app.config["DATABASE"], query, limit, (page - 1) * min(max(limit, 1), 100)) if query else list_events(app.config["DATABASE"], limit, (page - 1) * min(max(limit, 1), 100))
+        page_size = min(max(limit, 1), 100)
+        entries = filter_events(app.config["DATABASE"], query, category, severity, page_size, (page - 1) * page_size)
         return jsonify(events=entries, page=page, limit=min(max(limit, 1), 100))
 
     @app.get("/version")
@@ -334,14 +330,7 @@ def create_app(test_config=None):
             page = 1
         page_size = 20
         offset = (page - 1) * page_size
-        if severity in {"low", "normal", "high"}:
-            entries = list_events_by_severity(app.config["DATABASE"], severity, page_size + 1, offset)
-        elif category:
-            entries = list_events_by_category(app.config["DATABASE"], category, page_size + 1, offset)
-        elif query:
-            entries = search_events(app.config["DATABASE"], query, page_size + 1, offset)
-        else:
-            entries = list_events(app.config["DATABASE"], page_size + 1, offset)
+        entries = filter_events(app.config["DATABASE"], query, category, severity, page_size + 1, offset)
         has_next = len(entries) > page_size
         entries = entries[:page_size]
         filters = {key: request.args[key] for key in ("q", "category", "severity") if request.args.get(key)}
