@@ -64,3 +64,9 @@ def test_monitor_schedule_endpoint_reports_next_run(client):
     assert response.json["interval_seconds"] == 600
     assert response.json["next_check_at"]
     assert response.json["is_due"] is False
+
+
+def test_monitor_api_rejects_http_url_without_host(client):
+    response = client.post("/api/monitors", json={"name": "Bad", "url": "https://"})
+    assert response.status_code == 400
+    assert "absolute" in response.json["error"]

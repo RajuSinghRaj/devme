@@ -211,8 +211,9 @@ def create_app(test_config=None):
             return jsonify(error="interval_seconds must be an integer"), 400
         if not isinstance(name, str) or not name.strip():
             return jsonify(error="name is required"), 400
-        if not isinstance(url, str) or not url.startswith(("https://", "http://")):
-            return jsonify(error="url must use http or https"), 400
+        parsed_url = urlsplit(url) if isinstance(url, str) else None
+        if not parsed_url or parsed_url.scheme not in {"http", "https"} or not parsed_url.hostname:
+            return jsonify(error="url must be an absolute HTTP or HTTPS URL"), 400
         if interval < 30:
             return jsonify(error="interval_seconds must be at least 30"), 400
         if not update_monitor(app.config["DATABASE"], monitor_id, name.strip()[:120], url[:2048], interval):
@@ -244,8 +245,9 @@ def create_app(test_config=None):
         interval = payload.get("interval_seconds", 300)
         if not isinstance(name, str) or not name.strip():
             return jsonify(error="name is required"), 400
-        if not isinstance(url, str) or not url.startswith(("https://", "http://")):
-            return jsonify(error="url must use http or https"), 400
+        parsed_url = urlsplit(url) if isinstance(url, str) else None
+        if not parsed_url or parsed_url.scheme not in {"http", "https"} or not parsed_url.hostname:
+            return jsonify(error="url must be an absolute HTTP or HTTPS URL"), 400
         try:
             interval = int(interval)
         except (TypeError, ValueError):
