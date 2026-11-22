@@ -35,3 +35,13 @@ def test_monitor_summary_calculates_success_rate(app):
     assert summary["total_checks"] == 2
     assert summary["uptime_percent"] == 50.0
     assert summary["latest"]["success"] == 0
+
+
+def test_old_monitor_results_can_be_pruned(app):
+    from monitors import list_results, prune_results
+    monitor_id = create_monitor(app.config["DATABASE"], "Docs", "https://docs.example")
+    record_result(app.config["DATABASE"], monitor_id, True, 200, 10)
+    removed = prune_results(app.config["DATABASE"], "2999-01-01 00:00:00")
+    assert removed == 1
+    assert list_results(app.config["DATABASE"], monitor_id) == []
+

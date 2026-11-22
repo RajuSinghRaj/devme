@@ -119,3 +119,14 @@ def update_monitor(database, monitor_id, name, url, interval_seconds):
             return cursor.rowcount == 1
     finally:
         connection.close()
+
+
+def prune_results(database, before):
+    """Delete check history older than an ISO-8601 cutoff timestamp."""
+    connection = connect(database)
+    try:
+        with connection:
+            cursor = connection.execute("DELETE FROM monitor_results WHERE checked_at < ?", (before,))
+            return cursor.rowcount
+    finally:
+        connection.close()
