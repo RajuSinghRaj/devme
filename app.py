@@ -107,6 +107,9 @@ def create_app(test_config=None):
     def api_events():
         try:
             limit = int(request.args.get("limit", "50"))
+            page = int(request.args.get("page", "1"))
+            if page < 1:
+                raise ValueError
         except ValueError:
             return jsonify(error="limit must be an integer"), 400
         query = request.args.get("q", "")[:100]
@@ -114,8 +117,8 @@ def create_app(test_config=None):
         if category:
             entries = list_events_by_category(app.config["DATABASE"], category, limit)
         else:
-            entries = search_events(app.config["DATABASE"], query, limit) if query else list_events(app.config["DATABASE"], limit)
-        return jsonify(events=entries)
+            entries = search_events(app.config["DATABASE"], query, limit) if query else list_events(app.config["DATABASE"], limit, (page - 1) * min(max(limit, 1), 100))
+        return jsonify(events=entries, page=page, limit=min(max(limit, 1), 100))
 
     @app.get("/version")
     def version():
