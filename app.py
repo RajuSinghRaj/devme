@@ -47,6 +47,12 @@ def create_app(test_config=None):
 
     app.extensions["devtrack_started_at"] = time.monotonic()
 
+    @app.cli.command("init-db")
+    def initialize_database_command():
+        """Initialize the configured DevTrack database."""
+        initialize(app.config["DATABASE"])
+        click.echo("Database ready")
+
     @app.cli.command("count-events")
     def count_events_command():
         """Print the number of saved developer log entries."""
