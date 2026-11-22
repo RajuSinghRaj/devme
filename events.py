@@ -41,3 +41,22 @@ def get_event(database, event_id):
         return dict(row) if row else None
     finally:
         connection.close()
+
+
+def search_events(database, query, limit=50):
+    """Find events by title or details using a literal substring."""
+    text = str(query).strip()
+    if not text:
+        return list_events(database, limit)
+    bounded_limit = max(1, min(int(limit), 100))
+    connection = connect(database)
+    try:
+        pattern = f"%{text}%"
+        rows = connection.execute(
+            "SELECT id, title, details, category, severity, created_at FROM events "
+            "WHERE title LIKE ? ESCAPE '\\' OR details LIKE ? ESCAPE '\\' ORDER BY id DESC LIMIT ?",
+            (pattern, pattern, bounded_limit),
+        ).fetchall()
+        return [dict(row) for row in rows]
+    finally:
+        connection.close()

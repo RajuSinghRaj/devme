@@ -4,7 +4,7 @@ import time
 from pathlib import Path
 
 from database import initialize
-from events import create_event, list_events
+from events import create_event, list_events, search_events
 
 from flask import Flask, jsonify, redirect, render_template, request, url_for
 
@@ -62,7 +62,9 @@ def create_app(test_config=None):
             limit = int(request.args.get("limit", "50"))
         except ValueError:
             return jsonify(error="limit must be an integer"), 400
-        return jsonify(events=list_events(app.config["DATABASE"], limit=limit))
+        query = request.args.get("q", "")[:100]
+        entries = search_events(app.config["DATABASE"], query, limit) if query else list_events(app.config["DATABASE"], limit)
+        return jsonify(events=entries)
 
     @app.get("/version")
     def version():
@@ -94,6 +96,8 @@ def create_app(test_config=None):
 
     @app.get("/")
     def dashboard():
-        return render_template("index.html", events=list_events(app.config["DATABASE"]))
+        query = request.args.get("q", "")[:100]
+        entries = search_events(app.config["DATABASE"], query) if query else list_events(app.config["DATABASE"])
+        return render_template("index.html", events=entries, query=query)
 
     return app
