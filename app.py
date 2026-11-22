@@ -4,9 +4,9 @@ import time
 from pathlib import Path
 
 from database import initialize
-from events import create_event, delete_event, count_events, latest_event, list_categories, list_events, list_events_by_category, search_events, update_event
+from events import create_event, delete_event, count_events, export_events_csv, latest_event, list_categories, list_events, list_events_by_category, search_events, update_event
 
-from flask import Flask, jsonify, redirect, render_template, request, url_for
+from flask import Flask, jsonify, make_response, redirect, render_template, request, url_for
 
 
 def create_app(test_config=None):
@@ -86,6 +86,13 @@ def create_app(test_config=None):
         if event is None:
             return jsonify(error="event not found"), 404
         return jsonify(event=event)
+
+    @app.get("/api/events.csv")
+    def api_export_events():
+        response = make_response(export_events_csv(app.config["DATABASE"]))
+        response.headers["Content-Type"] = "text/csv; charset=utf-8"
+        response.headers["Content-Disposition"] = "attachment; filename=devtrack-events.csv"
+        return response
 
     @app.get("/api/summary")
     def api_summary():
