@@ -4,7 +4,7 @@ import time
 from pathlib import Path
 
 from database import initialize
-from events import create_event, delete_event, count_events, export_events_csv, latest_event, list_categories, list_events, list_events_by_category, search_events, update_event
+from events import create_event, delete_event, count_events, export_events_csv, latest_event, list_categories, list_events, list_events_by_category, list_events_by_severity, search_events, update_event
 
 from flask import Flask, jsonify, make_response, redirect, render_template, request, url_for
 
@@ -121,7 +121,10 @@ def create_app(test_config=None):
             return jsonify(error="limit must be an integer"), 400
         query = request.args.get("q", "")[:100]
         category = request.args.get("category", "")[:40]
-        if category:
+        severity = request.args.get("severity", "")[:10]
+        if severity in {"low", "normal", "high"}:
+            entries = list_events_by_severity(app.config["DATABASE"], severity, limit)
+        elif category:
             entries = list_events_by_category(app.config["DATABASE"], category, limit)
         else:
             entries = search_events(app.config["DATABASE"], query, limit) if query else list_events(app.config["DATABASE"], limit, (page - 1) * min(max(limit, 1), 100))
