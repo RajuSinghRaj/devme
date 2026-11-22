@@ -342,6 +342,6 @@ def create_app(test_config=None):
         has_next = len(entries) > page_size
         entries = entries[:page_size]
         filters = {key: request.args[key] for key in ("q", "category", "severity") if request.args.get(key)}
-        return render_template("index.html", events=entries, query=query, categories=list_categories(app.config["DATABASE"]), category_options=sorted(set(list_categories(app.config["DATABASE"])) | {"note", "build", "fix", "decision"}), selected_category=category, selected_severity=severity, event_count=count_events(app.config["DATABASE"]), category_count=len(list_categories(app.config["DATABASE"])), monitors=list_monitors(app.config["DATABASE"]), page=page, has_next=has_next, filters=filters)
+        return render_template("index.html", events=entries, query=query, categories=list_categories(app.config["DATABASE"]), category_options=sorted(set(list_categories(app.config["DATABASE"])) | {"note", "build", "fix", "decision"}, key=str.casefold), selected_category=category, selected_severity=severity, event_count=count_events(app.config["DATABASE"]), category_count=len(list_categories(app.config["DATABASE"])), monitors=list_monitors(app.config["DATABASE"]), page=page, has_next=has_next, filters=filters)
 
     return app
