@@ -1,5 +1,6 @@
 from datetime import datetime, timezone
 import os
+import re
 import time
 import uuid
 from pathlib import Path
@@ -29,7 +30,8 @@ def create_app(test_config=None):
 
     @app.before_request
     def assign_request_id():
-        g.request_id = request.headers.get("X-Request-ID") or uuid.uuid4().hex
+        supplied_id = request.headers.get("X-Request-ID", "")
+        g.request_id = supplied_id if re.fullmatch(r"[A-Za-z0-9._-]{1,64}", supplied_id) else uuid.uuid4().hex
 
     @app.after_request
     def add_content_type_options(response):
