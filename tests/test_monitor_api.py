@@ -47,3 +47,11 @@ def test_monitor_api_retrieves_one_monitor(client):
     monitor_id = client.post("/api/monitors", json={"name": "Docs", "url": "https://docs.example"}).json["id"]
     assert client.get(f"/api/monitors/{monitor_id}").json["monitor"]["name"] == "Docs"
     assert client.get("/api/monitors/999").status_code == 404
+
+
+def test_monitor_api_updates_metadata(client):
+    monitor_id = client.post("/api/monitors", json={"name": "Docs", "url": "https://docs.example"}).json["id"]
+    response = client.put(f"/api/monitors/{monitor_id}", json={"name": "Status", "url": "https://status.example", "interval_seconds": 600})
+    assert response.status_code == 200
+    assert response.json["monitor"]["name"] == "Status"
+    assert response.json["monitor"]["interval_seconds"] == 600

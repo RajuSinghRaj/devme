@@ -6,7 +6,7 @@ import uuid
 from pathlib import Path
 
 from database import initialize
-from monitors import create_monitor, delete_monitor, get_monitor, list_monitors, list_results, monitor_summary, record_result, set_monitor_enabled
+from monitors import create_monitor, delete_monitor, get_monitor, list_monitors, list_results, monitor_summary, record_result, update_monitor, set_monitor_enabled
 from events import create_event, delete_event, count_events, export_events_csv, latest_event, list_categories, list_events, list_events_by_category, list_events_by_severity, search_events, update_event
 
 from flask import Flask, g, jsonify, make_response, redirect, render_template, request, url_for
@@ -178,6 +178,26 @@ def create_app(test_config=None):
             return jsonify(error="response_ms must be nonnegative"), 400
         result_id = record_result(app.config["DATABASE"], monitor_id, payload["success"], status_code, response_ms, str(payload.get("error", "")))
         return jsonify(id=result_id), 201
+
+    @app.put("/api/monitors/<int:monitor_id>")
+    def api_replace_monitor(monitor_id):
+        payload = request.get_json(silent=True)
+        if not isinstance(payload, dict):
+            return jsonify(error="JSON object required"), 400
+        name, url = payload.get("name"), payload.get("url")
+        try:
+            interval = int(payload.get("interval_seconds", 300))
+        except (TypeError, ValueError):
+            return jsonify(error="interval_seconds must be an integer"), 400
+        if not isinstance(name, str) or not name.strip():
+            return jsonify(error="name is required"), 400
+        if not isinstance(url, str) or not url.startswith(("https://", "http://")):
+            return jsonify(error="url must use http or https"), 400
+        if interval < 30:
+            return jsonify(error="interval_seconds must be at least 30"), 400
+        if not update_monitor(app.config["DATABASE"], monitor_id, name.strip()[:120], url[:2048], interval):
+            return jsonify(error="monitor not found"), 404
+        return jsonify(monitor=get_monitor(app.config["DATABASE"], monitor_id))
 
     @app.patch("/api/monitors/<int:monitor_id>")
     def api_update_monitor(monitor_id):
