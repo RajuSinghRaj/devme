@@ -1,12 +1,13 @@
 from datetime import datetime, timezone
 import os
 import time
+import uuid
 from pathlib import Path
 
 from database import initialize
 from events import create_event, delete_event, count_events, export_events_csv, latest_event, list_categories, list_events, list_events_by_category, list_events_by_severity, search_events, update_event
 
-from flask import Flask, jsonify, make_response, redirect, render_template, request, url_for
+from flask import Flask, g, jsonify, make_response, redirect, render_template, request, url_for
 
 
 def create_app(test_config=None):
@@ -21,8 +22,13 @@ def create_app(test_config=None):
         app.config.update(test_config)
     initialize(app.config["DATABASE"])
 
+    @app.before_request
+    def assign_request_id():
+        g.request_id = request.headers.get("X-Request-ID") or uuid.uuid4().hex
+
     @app.after_request
     def add_content_type_options(response):
+        response.headers["X-Request-ID"] = g.request_id
         response.headers.setdefault("X-Content-Type-Options", "nosniff")
         response.headers.setdefault("X-Frame-Options", "DENY")
         response.headers.setdefault("Referrer-Policy", "strict-origin-when-cross-origin")
